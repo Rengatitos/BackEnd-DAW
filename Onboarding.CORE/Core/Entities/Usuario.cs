@@ -3,34 +3,42 @@ using MongoDB.Bson.Serialization.Attributes;
 
 namespace Onboarding.CORE.Entities
 {
-    public class Usuario 
-    {
-        [BsonId]
-        [BsonRepresentation(BsonType.ObjectId)]
-        public string? Id { get; set; }
+    using MongoDB.Bson;
+    using MongoDB.Bson.Serialization.Attributes;
 
-        [BsonElement("nombre")]
-        public string Nombre { get; set; } = string.Empty;
 
-        [BsonElement("correo")]
-        public string Correo { get; set; } = string.Empty;
+        public class Usuario
+        {
+            [BsonId]
+            public ObjectId Id { get; set; }
 
-        [BsonElement("passwordHash")]
-        public string PasswordHash { get; set; } = string.Empty;
+            [BsonElement("nombre")]
+            public string Nombre { get; set; } = string.Empty;
 
-        [BsonElement("area")]
-        public string? Area { get; set; }
+            [BsonElement("correo")]
+            public string Correo { get; set; } = string.Empty;
 
-        [BsonElement("rol_ref")]
-        [BsonRepresentation(BsonType.ObjectId)]
-        public string? RolRef { get; set; }
+            [BsonElement("passwordHash")]
+            public string PasswordHash { get; set; } = string.Empty;
 
-        [BsonElement("nivel_onboarding")]
-        public NivelOnboarding NivelOnboarding { get; set; } = new();
+            [BsonElement("area")]
+            public string? Area { get; set; }
 
-        [BsonElement("estado")]
-        public string Estado { get; set; } = "Activo";
-    }
+            [BsonElement("rol_ref")]
+            [BsonRepresentation(BsonType.ObjectId)]
+            public string? RolRef { get; set; }
+
+            [BsonElement("nivel_onboarding")]
+            public NivelOnboarding NivelOnboarding { get; set; } = new();
+
+            [BsonElement("telefono")]
+            public string? Telefono { get; set; }   // <-- 🔥 AGREGADO
+
+            [BsonElement("estado")]
+            public string Estado { get; set; } = "Activo";
+        }
+    
+
 
     public class NivelOnboarding
     {

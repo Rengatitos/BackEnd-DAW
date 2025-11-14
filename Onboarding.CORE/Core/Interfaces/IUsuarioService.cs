@@ -1,14 +1,12 @@
 ﻿using Onboarding.CORE.DTOs;
+using Onboarding.CORE.Entities;
 
-namespace Onboarding.CORE.Core.Interfaces
+public interface IUsuarioService
 {
-    public interface IUsuarioService
-    {
-        Task CreateAsync(UsuarioCreateDTO dto);
-        Task DeleteAsync(string id);
-        Task<List<UsuarioResponseDTO>> GetAllAsync();
-        Task<UsuarioResponseDTO?> GetByIdAsync(string id);
-        Task<UsuarioResponseDTO?> LoginAsync(LoginDTO dto);
-        Task UpdateAsync(string id, UsuarioCreateDTO dto);
-    }
+    Task CreateAsync(UsuarioCreateDTO dto);
+    Task<UsuarioResponseDTO?> LoginAsync(LoginDTO dto);
+    Task<List<Usuario>> GetAllAsync();
+    Task<Usuario?> GetByIdAsync(string id);
+    Task UpdateAsync(string id, UsuarioCreateDTO dto);
+    Task DeleteAsync(string id);
 }

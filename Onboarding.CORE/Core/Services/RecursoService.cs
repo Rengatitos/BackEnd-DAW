@@ -1,6 +1,9 @@
 ﻿using Onboarding.CORE.Core.Interfaces;
 using Onboarding.CORE.DTOs;
 using Onboarding.CORE.Entities;
+using MongoDB.Bson;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace Onboarding.CORE.Services
 {
@@ -47,7 +50,7 @@ namespace Onboarding.CORE.Services
         {
             var recurso = new Recurso
             {
-                Id = Guid.NewGuid().ToString(),
+                Id = ObjectId.GenerateNewId().ToString(),
                 Descripcion = dto.Descripcion,
                 Link = dto.Link,
                 Tipo = dto.Tipo,
@@ -92,6 +95,44 @@ namespace Onboarding.CORE.Services
 
             await _recursoRepository.DeleteAsync(id);
             return true;
+        }
+
+        // Nuevos métodos
+        public async Task<List<RecursoDTO>> GetByAdminAsync(string adminId)
+        {
+            var recursos = await _recursoRepository.GetByAdminRefAsync(adminId);
+            return recursos.Select(r => new RecursoDTO
+            {
+                Id = r.Id!,
+                Descripcion = r.Descripcion,
+                Link = r.Link,
+                Tipo = r.Tipo,
+                Estado = r.Estado,
+                FechaSubida = r.FechaSubida
+            }).ToList();
+        }
+
+        public async Task<bool> UpdateEstadoAsync(string id, string estado)
+        {
+            var recursoExistente = await _recursoRepository.GetByIdAsync(id);
+            if (recursoExistente == null)
+                return false;
+
+            return await _recursoRepository.UpdateEstadoAsync(id, estado);
+        }
+
+        public async Task<List<RecursoDTO>> GetByFechaRangeAsync(DateTime desde, DateTime hasta)
+        {
+            var recursos = await _recursoRepository.GetByFechaRangeAsync(desde, hasta);
+            return recursos.Select(r => new RecursoDTO
+            {
+                Id = r.Id!,
+                Descripcion = r.Descripcion,
+                Link = r.Link,
+                Tipo = r.Tipo,
+                Estado = r.Estado,
+                FechaSubida = r.FechaSubida
+            }).ToList();
         }
     }
 }

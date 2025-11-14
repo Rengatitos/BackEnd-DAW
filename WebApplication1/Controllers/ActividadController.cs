@@ -168,38 +168,17 @@ namespace Onboarding.Api.Controllers
         }
 
         /// <summary>
-        /// Obtiene el conteo total de actividades
+        /// Obtiene el conteo de actividades de un usuario específico
         /// </summary>
-        [HttpGet("count")]
-        [ProducesResponseType(StatusCodes.Status200OK)]
-        public async Task<ActionResult<long>> GetCount()
-        {
-            try
-            {
-                var count = await _actividadService.GetCountAsync();
-                return Ok(new { total = count });
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error al obtener el conteo de actividades");
-                return StatusCode(500, new { mensaje = "Error interno del servidor" });
-            }
-        }
-
-        /// <summary>
-        /// Obtiene actividades con paginación
-        /// </summary>
-        [HttpGet("paginado")]
+        [HttpGet("count/{usuarioRef}")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        public async Task<ActionResult<PaginatedResultDTO<ActividadResponseDTO>>> GetPaginated(
-            [FromQuery] int pageNumber = 1,
-            [FromQuery] int pageSize = 10)
+        public async Task<ActionResult> GetCountByUsuario(string usuarioRef)
         {
             try
             {
-                var result = await _actividadService.GetPaginatedAsync(pageNumber, pageSize);
-                return Ok(result);
+                var count = await _actividadService.GetCountByUsuarioAsync(usuarioRef);
+                return Ok(new { usuarioRef, totalActividades = count });
             }
             catch (ArgumentException ex)
             {
@@ -207,7 +186,7 @@ namespace Onboarding.Api.Controllers
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error al obtener actividades paginadas");
+                _logger.LogError(ex, "Error al obtener el conteo de actividades del usuario {UsuarioRef}", usuarioRef);
                 return StatusCode(500, new { mensaje = "Error interno del servidor" });
             }
         }
@@ -225,7 +204,7 @@ namespace Onboarding.Api.Controllers
 
             try
             {
-                var actividadCreada = await _actividadService.CreateAsync(dto); // CAMBIO: ahora retorna la actividad
+                var actividadCreada = await _actividadService.CreateAsync(dto);
                 return CreatedAtAction(
                     nameof(GetById),
                     new { id = actividadCreada.Id },
@@ -261,7 +240,7 @@ namespace Onboarding.Api.Controllers
 
             try
             {
-                var actualizado = await _actividadService.UpdateAsync(id, dto); // CAMBIO: ahora retorna bool
+                var actualizado = await _actividadService.UpdateAsync(id, dto);
                 if (!actualizado)
                     return NotFound(new { mensaje = $"No se pudo actualizar la actividad con ID {id}" });
 
@@ -328,7 +307,7 @@ namespace Onboarding.Api.Controllers
         {
             try
             {
-                var eliminado = await _actividadService.DeleteAsync(id); // CAMBIO: ahora retorna bool
+                var eliminado = await _actividadService.DeleteAsync(id);
                 if (!eliminado)
                     return NotFound(new { mensaje = $"No se pudo eliminar la actividad con ID {id}" });
 

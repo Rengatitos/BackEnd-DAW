@@ -20,7 +20,7 @@ namespace Onboarding.Api.Controllers
         }
 
         // ============================================================
-        // 🔐 LOGIN
+        // 🔐 LOGIN - SIN AUTORIZACIÓN
         // ============================================================
         [HttpPost("login")]
         [AllowAnonymous]
@@ -30,7 +30,6 @@ namespace Onboarding.Api.Controllers
             if (usuario == null)
                 return Unauthorized(new { message = "Correo o contraseña incorrectos" });
 
-            // ✅ Crear token JWT con los datos del usuario autenticado
             var token = _jwtService.GenerateToken(
                 usuario.Id,
                 usuario.Nombre,
@@ -78,7 +77,7 @@ namespace Onboarding.Api.Controllers
         public async Task<IActionResult> Create([FromBody] UsuarioCreateDTO dto)
         {
             await _usuarioService.CreateAsync(dto);
-            return Ok(new { message = "✅ Usuario creado correctamente" });
+            return Ok(new { message = "Usuario creado correctamente" });
         }
 
         // ============================================================
@@ -89,7 +88,7 @@ namespace Onboarding.Api.Controllers
         public async Task<IActionResult> Update(string id, [FromBody] UsuarioCreateDTO dto)
         {
             await _usuarioService.UpdateAsync(id, dto);
-            return Ok(new { message = "📝 Usuario actualizado correctamente" });
+            return Ok(new { message = "Usuario actualizado correctamente" });
         }
 
         // ============================================================
@@ -100,7 +99,7 @@ namespace Onboarding.Api.Controllers
         public async Task<IActionResult> Delete(string id)
         {
             await _usuarioService.DeleteAsync(id);
-            return Ok(new { message = "🗑️ Usuario eliminado correctamente" });
+            return Ok(new { message = "Usuario eliminado correctamente" });
         }
     }
 }

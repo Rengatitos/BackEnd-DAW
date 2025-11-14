@@ -4,85 +4,349 @@ using Onboarding.CORE.DTOs;
 
 namespace Onboarding.Api.Controllers
 {
+    /// <summary>
+    /// Controlador para gestionar Actividades
+    /// </summary>
     [ApiController]
     [Route("api/[controller]")]
+    [Produces("application/json")]
     public class ActividadController : ControllerBase
     {
         private readonly IActividadService _actividadService;
+        private readonly ILogger<ActividadController> _logger;
 
-        public ActividadController(IActividadService actividadService)
+        public ActividadController(
+            IActividadService actividadService,
+            ILogger<ActividadController> logger)
         {
             _actividadService = actividadService;
+            _logger = logger;
         }
 
-        // ✅ GET: api/actividad
+        /// <summary>
+        /// Obtiene todas las actividades
+        /// </summary>
         [HttpGet]
+        [ProducesResponseType(StatusCodes.Status200OK)]
         public async Task<ActionResult<List<ActividadResponseDTO>>> GetAll()
         {
-            var actividades = await _actividadService.GetAllAsync();
-            return Ok(actividades);
+            try
+            {
+                var actividades = await _actividadService.GetAllAsync();
+                return Ok(actividades);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error al obtener todas las actividades");
+                return StatusCode(500, new { mensaje = "Error interno del servidor" });
+            }
         }
 
-        // ✅ GET: api/actividad/{id}
+        /// <summary>
+        /// Obtiene una actividad por su ID
+        /// </summary>
         [HttpGet("{id}")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<ActionResult<ActividadResponseDTO>> GetById(string id)
         {
-            var actividad = await _actividadService.GetByIdAsync(id);
-            if (actividad == null)
-                return NotFound(new { mensaje = "Actividad no encontrada" });
+            try
+            {
+                var actividad = await _actividadService.GetByIdAsync(id);
+                if (actividad == null)
+                    return NotFound(new { mensaje = $"No se encontró la actividad con ID {id}" });
 
-            return Ok(actividad);
+                return Ok(actividad);
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(new { mensaje = ex.Message });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error al obtener la actividad {Id}", id);
+                return StatusCode(500, new { mensaje = "Error interno del servidor" });
+            }
         }
 
-        // ✅ GET: api/actividad/usuario/{usuarioRef}
+        /// <summary>
+        /// Obtiene actividades por usuario
+        /// </summary>
         [HttpGet("usuario/{usuarioRef}")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
         public async Task<ActionResult<List<ActividadResponseDTO>>> GetByUsuario(string usuarioRef)
         {
-            var actividades = await _actividadService.GetByUsuarioAsync(usuarioRef);
-            return Ok(actividades);
+            try
+            {
+                var actividades = await _actividadService.GetByUsuarioAsync(usuarioRef);
+                return Ok(actividades);
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(new { mensaje = ex.Message });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error al obtener actividades del usuario {UsuarioRef}", usuarioRef);
+                return StatusCode(500, new { mensaje = "Error interno del servidor" });
+            }
         }
 
-        // ✅ GET: api/actividad/pendientes/{usuarioRef}
+        /// <summary>
+        /// Obtiene actividades pendientes de un usuario
+        /// </summary>
         [HttpGet("pendientes/{usuarioRef}")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
         public async Task<ActionResult<List<ActividadResponseDTO>>> GetPendientesByUsuario(string usuarioRef)
         {
-            var pendientes = await _actividadService.GetPendientesPorUsuarioAsync(usuarioRef);
-            return Ok(pendientes);
+            try
+            {
+                var pendientes = await _actividadService.GetPendientesPorUsuarioAsync(usuarioRef);
+                return Ok(pendientes);
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(new { mensaje = ex.Message });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error al obtener pendientes del usuario {UsuarioRef}", usuarioRef);
+                return StatusCode(500, new { mensaje = "Error interno del servidor" });
+            }
         }
 
-        // ✅ POST: api/actividad
-        [HttpPost]
-        public async Task<ActionResult> Create([FromBody] ActividadCreateDTO dto)
+        /// <summary>
+        /// Obtiene actividades por estado
+        /// </summary>
+        [HttpGet("estado/{estado}")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        public async Task<ActionResult<List<ActividadResponseDTO>>> GetByEstado(string estado)
         {
-            if (dto == null)
-                return BadRequest(new { mensaje = "Datos inválidos" });
-
-            await _actividadService.CreateAsync(dto);
-            return CreatedAtAction(nameof(GetAll), new { mensaje = "Actividad creada correctamente" });
+            try
+            {
+                var actividades = await _actividadService.GetByEstadoAsync(estado);
+                return Ok(actividades);
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(new { mensaje = ex.Message });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error al obtener actividades por estado {Estado}", estado);
+                return StatusCode(500, new { mensaje = "Error interno del servidor" });
+            }
         }
 
-        // ✅ PUT: api/actividad/{id}
+        /// <summary>
+        /// Obtiene actividades en un rango de fechas
+        /// </summary>
+        [HttpGet("rango-fechas")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        public async Task<ActionResult<List<ActividadResponseDTO>>> GetByFechaRango(
+            [FromQuery] DateTime fechaInicio,
+            [FromQuery] DateTime fechaFin)
+        {
+            try
+            {
+                var actividades = await _actividadService.GetByFechaRangoAsync(fechaInicio, fechaFin);
+                return Ok(actividades);
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(new { mensaje = ex.Message });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error al obtener actividades por rango de fechas");
+                return StatusCode(500, new { mensaje = "Error interno del servidor" });
+            }
+        }
+
+        /// <summary>
+        /// Obtiene el conteo total de actividades
+        /// </summary>
+        [HttpGet("count")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        public async Task<ActionResult<long>> GetCount()
+        {
+            try
+            {
+                var count = await _actividadService.GetCountAsync();
+                return Ok(new { total = count });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error al obtener el conteo de actividades");
+                return StatusCode(500, new { mensaje = "Error interno del servidor" });
+            }
+        }
+
+        /// <summary>
+        /// Obtiene actividades con paginación
+        /// </summary>
+        [HttpGet("paginado")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        public async Task<ActionResult<PaginatedResultDTO<ActividadResponseDTO>>> GetPaginated(
+            [FromQuery] int pageNumber = 1,
+            [FromQuery] int pageSize = 10)
+        {
+            try
+            {
+                var result = await _actividadService.GetPaginatedAsync(pageNumber, pageSize);
+                return Ok(result);
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(new { mensaje = ex.Message });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error al obtener actividades paginadas");
+                return StatusCode(500, new { mensaje = "Error interno del servidor" });
+            }
+        }
+
+        /// <summary>
+        /// Crea una nueva actividad
+        /// </summary>
+        [HttpPost]
+        [ProducesResponseType(StatusCodes.Status201Created)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        public async Task<ActionResult<ActividadResponseDTO>> Create([FromBody] ActividadCreateDTO dto)
+        {
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+
+            try
+            {
+                var actividadCreada = await _actividadService.CreateAsync(dto); // CAMBIO: ahora retorna la actividad
+                return CreatedAtAction(
+                    nameof(GetById),
+                    new { id = actividadCreada.Id },
+                    actividadCreada
+                );
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(new { mensaje = ex.Message });
+            }
+            catch (InvalidOperationException ex)
+            {
+                return BadRequest(new { mensaje = ex.Message });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error al crear actividad");
+                return StatusCode(500, new { mensaje = "Error interno del servidor" });
+            }
+        }
+
+        /// <summary>
+        /// Actualiza una actividad existente
+        /// </summary>
         [HttpPut("{id}")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<ActionResult> Update(string id, [FromBody] ActividadCreateDTO dto)
         {
-            var actividad = await _actividadService.GetByIdAsync(id);
-            if (actividad == null)
-                return NotFound(new { mensaje = "Actividad no encontrada" });
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
 
-            await _actividadService.UpdateAsync(id, dto);
-            return Ok(new { mensaje = "Actividad actualizada correctamente" });
+            try
+            {
+                var actualizado = await _actividadService.UpdateAsync(id, dto); // CAMBIO: ahora retorna bool
+                if (!actualizado)
+                    return NotFound(new { mensaje = $"No se pudo actualizar la actividad con ID {id}" });
+
+                return Ok(new { mensaje = "Actividad actualizada correctamente" });
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(new { mensaje = ex.Message });
+            }
+            catch (KeyNotFoundException ex)
+            {
+                return NotFound(new { mensaje = ex.Message });
+            }
+            catch (InvalidOperationException ex)
+            {
+                return BadRequest(new { mensaje = ex.Message });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error al actualizar actividad {Id}", id);
+                return StatusCode(500, new { mensaje = "Error interno del servidor" });
+            }
         }
 
-        // ✅ DELETE: api/actividad/{id}
+        /// <summary>
+        /// Actualiza solo el estado de una actividad
+        /// </summary>
+        [HttpPatch("{id}/estado")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        public async Task<ActionResult> UpdateEstado(string id, [FromBody] string nuevoEstado)
+        {
+            try
+            {
+                var actualizado = await _actividadService.UpdateEstadoAsync(id, nuevoEstado);
+                if (!actualizado)
+                    return NotFound(new { mensaje = $"No se pudo actualizar el estado de la actividad con ID {id}" });
+
+                return Ok(new { mensaje = "Estado actualizado correctamente", nuevoEstado });
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(new { mensaje = ex.Message });
+            }
+            catch (KeyNotFoundException ex)
+            {
+                return NotFound(new { mensaje = ex.Message });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error al actualizar estado de actividad {Id}", id);
+                return StatusCode(500, new { mensaje = "Error interno del servidor" });
+            }
+        }
+
+        /// <summary>
+        /// Elimina una actividad
+        /// </summary>
         [HttpDelete("{id}")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<ActionResult> Delete(string id)
         {
-            var actividad = await _actividadService.GetByIdAsync(id);
-            if (actividad == null)
-                return NotFound(new { mensaje = "Actividad no encontrada" });
+            try
+            {
+                var eliminado = await _actividadService.DeleteAsync(id); // CAMBIO: ahora retorna bool
+                if (!eliminado)
+                    return NotFound(new { mensaje = $"No se pudo eliminar la actividad con ID {id}" });
 
-            await _actividadService.DeleteAsync(id);
-            return Ok(new { mensaje = "Actividad eliminada correctamente" });
+                return Ok(new { mensaje = "Actividad eliminada correctamente" });
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(new { mensaje = ex.Message });
+            }
+            catch (KeyNotFoundException ex)
+            {
+                return NotFound(new { mensaje = ex.Message });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error al eliminar actividad {Id}", id);
+                return StatusCode(500, new { mensaje = "Error interno del servidor" });
+            }
         }
     }
 }

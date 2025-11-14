@@ -191,9 +191,9 @@ namespace Onboarding.Api.Controllers
             }
         }
 
-        /// <summary>
+       
         /// Crea una nueva actividad
-        /// </summary>
+       
         [HttpPost]
         [ProducesResponseType(StatusCodes.Status201Created)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]

@@ -13,7 +13,7 @@ namespace Onboarding.CORE.Helpers
             // 🧩 Conecta con el servidor local de Ollama
             _httpClient = new HttpClient
             {
-                BaseAddress = new Uri("http://localhost:11434/")
+                BaseAddress = new Uri("https://localhost:7139/")  //localhost
             };
         }
 

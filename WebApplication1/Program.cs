@@ -50,7 +50,12 @@ builder.Services.AddScoped<IJwtService, JwtService>();
 // =======================
 // 🤖 CLIENTE OLLAMA
 // =======================
-builder.Services.AddSingleton<OllamaClient>();
+builder.Services.AddHttpClient<OllamaClient>(client =>
+{
+    client.BaseAddress = new Uri("http://134.199.192.88:11434/api/");
+    client.Timeout = TimeSpan.FromSeconds(300);
+});
+
 
 // =======================
 // 🔐 CONFIGURAR JWT
@@ -121,6 +126,7 @@ app.MapControllers();
 // 🚀 ARRANQUE FINAL
 // =======================
 Console.WriteLine("✅ Servidor Onboarding API iniciado correctamente...");
-Console.WriteLine("🧠 Cliente Ollama disponible en http://localhost:11434");
+Console.WriteLine("🧠 Cliente Ollama disponible en http://134.199.192.88:11434/api/");
+
 
 app.Run();

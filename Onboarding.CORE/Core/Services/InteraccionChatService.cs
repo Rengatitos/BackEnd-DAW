@@ -11,10 +11,11 @@ namespace Onboarding.CORE.Services
         private readonly IInteraccionChatRepository _interaccionRepository;
         private readonly OllamaClient _ollamaClient;
 
-        public InteraccionChatService(IInteraccionChatRepository interaccionRepository)
+        // Inyectar OllamaClient via DI
+        public InteraccionChatService(IInteraccionChatRepository interaccionRepository, OllamaClient ollamaClient)
         {
             _interaccionRepository = interaccionRepository;
-            _ollamaClient = new OllamaClient();
+            _ollamaClient = ollamaClient;
         }
 
         public async Task<List<InteraccionChatDTO>> GetAllAsync()

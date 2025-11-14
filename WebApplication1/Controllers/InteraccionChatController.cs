@@ -12,40 +12,46 @@ namespace Onboarding.Api.Controllers
         private readonly IInteraccionChatService _chatService;
         private readonly OllamaClient _ollamaClient;
 
-        public InteraccionChatController(IInteraccionChatService chatService)
+        public InteraccionChatController(
+            IInteraccionChatService chatService,
+            OllamaClient ollamaClient)
         {
             _chatService = chatService;
-            _ollamaClient = new OllamaClient(); // Cliente para llamar al modelo local
+            _ollamaClient = ollamaClient;
         }
 
-        // POST: api/InteraccionChat/chat
+        /// <summary>
+        /// Procesa un mensaje del usuario, obtiene respuesta de Ollama
+        /// y registra la interacción en MongoDB.
+        /// </summary>
         [HttpPost("chat")]
         public async Task<IActionResult> Chat([FromBody] InteraccionChatCreateDTO dto)
         {
+            if (dto == null)
+                return BadRequest(new { message = "El body no puede ser null." });
+
             if (string.IsNullOrWhiteSpace(dto.MensajeUsuario))
                 return BadRequest(new { message = "El mensaje no puede estar vacío." });
 
             try
             {
-                // 🔹 Generar respuesta usando OllamaClient con tinyllama
-                string respuesta = await _ollamaClient.GenerarRespuestaAsync(dto.MensajeUsuario, "tinyllama");
+                // 🔥 Llamada correcta (PowerShell style)
+                string respuesta = await _ollamaClient.GenerarRespuestaAsync(dto.MensajeUsuario);
 
-                // 🔹 Guardar la interacción en MongoDB
                 var interaccionDto = new InteraccionChatCreateDTO
                 {
                     UsuarioRef = dto.UsuarioRef ?? string.Empty,
-                    MensajeUsuario = dto.MensajeUsuario ?? string.Empty,
-                    RespuestaChatbot = respuesta ?? string.Empty,
+                    MensajeUsuario = dto.MensajeUsuario,
+                    RespuestaChatbot = respuesta,
                     Contexto = dto.Contexto ?? string.Empty
                 };
 
                 await _chatService.CreateAsync(interaccionDto);
 
-                // 🔹 Retornar la respuesta generada al cliente
                 return Ok(new
                 {
-                    usuario = dto.MensajeUsuario,
-                    respuesta = respuesta,
+                    mensaje_usuario = dto.MensajeUsuario,
+                    respuesta_chatbot = respuesta,
                     contexto = dto.Contexto,
                     guardado = "✅ Interacción registrada en MongoDB"
                 });
@@ -54,10 +60,10 @@ namespace Onboarding.Api.Controllers
             {
                 return StatusCode(500, new
                 {
-                    message = "Error al procesar el chat",
+                    message = "Error al procesar el chat.",
                     detalle = ex.Message
                 });
             }
         }
     }
-}
+    }

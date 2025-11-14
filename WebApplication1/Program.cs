@@ -1,9 +1,11 @@
 ﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using MongoDB.Driver;
 using Onboarding.CORE.Core.Interfaces;
 using Onboarding.CORE.Helpers;
 using Onboarding.CORE.Services;
+using Onboarding.CORE.Settings;
 using Onboarding.INFRA.Repositories;
 using Onboarding.Infrastructure.Repositories;
 using System.Text;
@@ -13,11 +15,11 @@ var builder = WebApplication.CreateBuilder(args);
 // =======================
 // 🔹 CONFIGURAR MONGO DB
 // =======================
+// 1. Leer configuración desde appsettings.json
 builder.Services.AddSingleton<IMongoClient>(sp =>
 {
     var mongoConnectionString = builder.Configuration["MongoDB:ConnectionString"]
         ?? "mongodb://localhost:27017";
-
     return new MongoClient(mongoConnectionString);
 });
 
@@ -26,6 +28,7 @@ builder.Services.AddScoped<IMongoDatabase>(sp =>
     var client = sp.GetRequiredService<IMongoClient>();
     return client.GetDatabase("OnboardingDB");
 });
+
 
 // =======================
 // 🔹 REPOSITORIOS Y SERVICIOS

@@ -5,42 +5,39 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
 
-namespace Onboarding.CORE.Services
+public class JwtService : IJwtService
 {
-    public class JwtService : IJwtService
+    private readonly IConfiguration _config;
+
+    public JwtService(IConfiguration config)
     {
-        private readonly IConfiguration _configuration;
+        _config = config;
+    }
 
-        public JwtService(IConfiguration configuration)
+    public string GenerateToken(string userId, string userName, string role)
+    {
+        var secret = _config["Jwt:Secret"];
+        var issuer = _config["Jwt:Issuer"];
+        var audience = _config["Jwt:Audience"];
+
+        var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secret));
+        var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
+
+        var claims = new[]
         {
-            _configuration = configuration;
-        }
+            new Claim(JwtRegisteredClaimNames.Sub, userId),
+            new Claim("userName", userName),
+            new Claim(ClaimTypes.Role, role)
+        };
 
-        public string GenerateToken(string userId, string userName, string role)
-        {
-            var secret = _configuration["JWT:Secret"];
-            if (string.IsNullOrEmpty(secret))
-                throw new InvalidOperationException("⚠️ La clave JWT no está configurada en appsettings.json (JWT:Secret).");
+        var token = new JwtSecurityToken(
+            issuer,
+            audience,
+            claims,
+            expires: DateTime.UtcNow.AddHours(2),
+            signingCredentials: creds
+        );
 
-            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secret));
-            var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
-
-            var claims = new[]
-            {
-                new Claim(JwtRegisteredClaimNames.Sub, userId),
-                new Claim("userName", userName),
-                new Claim(ClaimTypes.Role, role)
-            };
-
-            var token = new JwtSecurityToken(
-                issuer: "OnboardingApi",
-                audience: "OnboardingApi",
-                claims: claims,
-                expires: DateTime.UtcNow.AddHours(2),
-                signingCredentials: creds
-            );
-
-            return new JwtSecurityTokenHandler().WriteToken(token);
-        }
+        return new JwtSecurityTokenHandler().WriteToken(token);
     }
 }

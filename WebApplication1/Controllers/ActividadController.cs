@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Onboarding.CORE.Core.Interfaces;
-using Onboarding.CORE.DTOs;
+using Onboarding.CORE.DTOs; // Asegúrate de que esta directiva using esté presente
 
 namespace Onboarding.Api.Controllers
 {

@@ -1,8 +1,7 @@
-﻿using System.Collections.Generic;
-using System.Threading.Tasks;
+﻿using MongoDB.Bson;
 using MongoDB.Driver;
-using Onboarding.CORE.Core.Interfaces;
 using Onboarding.CORE.Entities;
+using Onboarding.CORE.Core.Interfaces;
 
 namespace Onboarding.Infrastructure.Repositories
 {
@@ -22,7 +21,8 @@ namespace Onboarding.Infrastructure.Repositories
 
         public async Task<Usuario?> GetByIdAsync(string id)
         {
-            return await _collection.Find(u => u.Id == id).FirstOrDefaultAsync();
+            var objectId = ObjectId.Parse(id);
+            return await _collection.Find(u => u.Id == objectId).FirstOrDefaultAsync();
         }
 
         public async Task<Usuario?> GetByCorreoAsync(string correo)
@@ -37,12 +37,15 @@ namespace Onboarding.Infrastructure.Repositories
 
         public async Task UpdateAsync(string id, Usuario usuario)
         {
-            await _collection.ReplaceOneAsync(u => u.Id == id, usuario);
+            var objectId = ObjectId.Parse(id);
+            usuario.Id = objectId; // importante
+            await _collection.ReplaceOneAsync(u => u.Id == objectId, usuario);
         }
 
         public async Task DeleteAsync(string id)
         {
-            await _collection.DeleteOneAsync(u => u.Id == id);
+            var objectId = ObjectId.Parse(id);
+            await _collection.DeleteOneAsync(u => u.Id == objectId);
         }
     }
 }

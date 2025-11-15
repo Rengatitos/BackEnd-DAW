@@ -17,4 +17,10 @@
         public string Estado { get; set; } = string.Empty;
         public DateTime FechaSubida { get; set; }
     }
+
+    // DTO para actualizar solo el campo 'estado' mediante PATCH
+    public class RecursoEstadoDTO
+    {
+        public string Estado { get; set; } = string.Empty;
+    }
 }

@@ -136,11 +136,14 @@ namespace Onboarding.Infrastructure.Repositories
         }
 
         /// <summary>
-        /// Obtiene el número total de actividades
+        /// Obtiene el conteo de actividades de un usuario específico
         /// </summary>
-        public async Task<long> GetCountAsync()
+        public async Task<long> GetCountByUsuarioAsync(string usuarioRef)
         {
-            return await _collection.CountDocumentsAsync(_ => true);
+            if (string.IsNullOrWhiteSpace(usuarioRef))
+                return 0;
+
+            return await _collection.CountDocumentsAsync(a => a.UsuarioRef == usuarioRef);
         }
 
     }

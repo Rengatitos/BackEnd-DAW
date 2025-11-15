@@ -20,7 +20,7 @@ namespace Onboarding.CORE.Core.Interfaces
         Task<List<ActividadResponseDTO>> GetByEstadoAsync(string estado);
         Task<List<ActividadResponseDTO>> GetByFechaRangoAsync(DateTime fechaInicio, DateTime fechaFin);
         Task<bool> UpdateEstadoAsync(string id, string nuevoEstado);
-        Task<long> GetCountAsync();
-        
+        Task<long> GetCountByUsuarioAsync(string usuarioRef);
+
     }
 }

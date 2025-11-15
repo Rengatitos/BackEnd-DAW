@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Onboarding.CORE.Core.Interfaces;
-using Onboarding.CORE.DTOs;
+using Onboarding.CORE.DTOs; // Asegúrate de que esta directiva using esté presente
 
 namespace Onboarding.Api.Controllers
 {
@@ -192,24 +192,11 @@ namespace Onboarding.Api.Controllers
         [HttpGet("paginado")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        public async Task<ActionResult<PaginatedResultDTO<ActividadResponseDTO>>> GetPaginated(
+        public async Task<ActionResult> GetPaginated(
             [FromQuery] int pageNumber = 1,
             [FromQuery] int pageSize = 10)
         {
-            try
-            {
-                var result = await _actividadService.GetPaginatedAsync(pageNumber, pageSize);
-                return Ok(result);
-            }
-            catch (ArgumentException ex)
-            {
-                return BadRequest(new { mensaje = ex.Message });
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error al obtener actividades paginadas");
-                return StatusCode(500, new { mensaje = "Error interno del servidor" });
-            }
+            return StatusCode(501, new { mensaje = "Funcionalidad no implementada: el método GetPaginatedAsync no existe en IActividadService." });
         }
 
         /// <summary>

@@ -135,7 +135,13 @@ namespace Onboarding.Infrastructure.Repositories
             return count > 0;
         }
 
-        
+        /// <summary>
+        /// Obtiene el número total de actividades
+        /// </summary>
+        public async Task<long> GetCountAsync()
+        {
+            return await _collection.CountDocumentsAsync(_ => true);
+        }
 
     }
 }

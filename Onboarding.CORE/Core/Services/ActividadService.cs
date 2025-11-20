@@ -209,14 +209,17 @@ namespace Onboarding.CORE.Services
         }
 
         /// <summary>
-        /// Obtiene el conteo total de actividades
+        /// Obtiene el conteo de actividades de un usuario específico
         /// </summary>
-        public async Task<long> GetCountAsync()
+        public async Task<long> GetCountByUsuarioAsync(string usuarioRef)
         {
-            return await _actividadRepository.GetCountAsync();
+            if (string.IsNullOrWhiteSpace(usuarioRef))
+                throw new ArgumentException("El ID de usuario no puede estar vacío", nameof(usuarioRef));
+
+            return await _actividadRepository.GetCountByUsuarioAsync(usuarioRef);
         }
 
-      
+
 
         /// <summary>
         /// Valida el DTO de entrada

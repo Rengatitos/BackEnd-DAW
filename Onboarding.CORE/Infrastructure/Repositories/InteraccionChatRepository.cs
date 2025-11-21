@@ -50,5 +50,14 @@ namespace Onboarding.INFRA.Repositories
         {
             await _collection.DeleteOneAsync(i => i.Id == id);
         }
+
+        // Nuevo método (obtiene SOLO la última interacción del usuario)
+        public async Task<InteraccionChat?> GetLastByUsuarioAsync(string usuarioRef)
+        {
+            return await _collection
+                .Find(i => i.UsuarioRef == usuarioRef)
+                .SortByDescending(i => i.FechaHora)
+                .FirstOrDefaultAsync();
+        }
     }
 }

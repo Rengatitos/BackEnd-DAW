@@ -1,5 +1,4 @@
 ﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using MongoDB.Driver;
 using Onboarding.CORE.Core.Interfaces;
@@ -12,7 +11,14 @@ using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Añadir soporte para variables de entorno
+// =======================
+// 🌍 Render: Puerto dinámico
+// =======================
+builder.WebHost.UseUrls($"http://0.0.0.0:{Environment.GetEnvironmentVariable("PORT")}");
+
+// =======================
+// ⚙ Cargar variables de entorno
+// =======================
 builder.Configuration.AddEnvironmentVariables();
 
 // =======================
@@ -20,11 +26,10 @@ builder.Configuration.AddEnvironmentVariables();
 // =======================
 builder.Services.AddSingleton<IMongoClient>(sp =>
 {
-    // Priorizar configuración en appsettings.json (sección "MongoDB"),
-    // luego variables de entorno "MONGODB_CONNECTIONSTRING", y por último valor por defecto.
     var mongoConnectionString = builder.Configuration.GetValue<string>("MongoDB:ConnectionString")
         ?? builder.Configuration["MONGODB_CONNECTIONSTRING"]
-        ?? "mongodb://localhost:27017"; // Valor por defecto para desarrollo
+        ?? "mongodb://localhost:27017";
+
     return new MongoClient(mongoConnectionString);
 });
 
@@ -34,6 +39,7 @@ builder.Services.AddScoped<IMongoDatabase>(sp =>
     var databaseName = builder.Configuration.GetValue<string>("MongoDB:DatabaseName")
         ?? builder.Configuration["MONGODB_DATABASENAME"]
         ?? "OnboardingDB";
+
     return client.GetDatabase(databaseName);
 });
 
@@ -67,10 +73,19 @@ builder.Services.AddHttpClient<OllamaClient>(client =>
 });
 
 // =======================
-// 🔐 CONFIGURAR JWT
+// 🔐 CONFIGURAR JWT (Corregido)
 // =======================
-var jwtKey = builder.Configuration["JWT_SECRET"] ?? "clave-secreta-prueba-12345";
-var jwtIssuer = builder.Configuration["JWT_ISSUER"] ?? "OnboardingAPI";
+var jwtKey = builder.Configuration["Jwt:Secret"]
+    ?? builder.Configuration["JWT_SECRET"]
+    ?? "clave-secreta-prueba-12345";
+
+var jwtIssuer = builder.Configuration["Jwt:Issuer"]
+    ?? builder.Configuration["JWT_ISSUER"]
+    ?? "OnboardingAPI";
+
+var jwtAudience = builder.Configuration["Jwt:Audience"]
+    ?? builder.Configuration["JWT_AUDIENCE"]
+    ?? "OnboardingFrontend";
 
 builder.Services.AddAuthentication(options =>
 {
@@ -86,13 +101,13 @@ builder.Services.AddAuthentication(options =>
         ValidateLifetime = true,
         ValidateIssuerSigningKey = true,
         ValidIssuer = jwtIssuer,
-        ValidAudience = builder.Configuration["JWT_AUDIENCE"],
+        ValidAudience = jwtAudience,
         IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtKey))
     };
 });
 
 // =======================
-// 🌐 CORS (SOLUCIÓN AL ERROR "Failed to fetch")
+// 🌐 CORS (SOLUCIÓN "Failed to fetch")
 // =======================
 builder.Services.AddCors(options =>
 {
@@ -122,19 +137,21 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
-app.UseHttpsRedirection();
+// 🔥 Render maneja HTTPS, así que lo quitamos
+// app.UseHttpsRedirection();
 
-app.UseCors("AllowAll"); // ✅ NECESARIO PARA QUE SWAGGER FUNCIONE
-
+app.UseCors("AllowAll");
 app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
 
 // =======================
-// 🚀 ARRANQUE FINAL
+// 🚀 INICIO
 // =======================
-Console.WriteLine("✅ Servidor Onboarding API iniciado correctamente...");
-Console.WriteLine("🧠 Cliente Ollama disponible en http://134.199.192.88:11434/api/");
+Console.WriteLine("==============================================");
+Console.WriteLine("🚀 Onboarding API iniciada correctamente");
+Console.WriteLine("🧠 Cliente Ollama: http://134.199.192.88:11434/api/");
+Console.WriteLine("==============================================");
 
 app.Run();

@@ -106,6 +106,13 @@ namespace Onboarding.CORE.Services
             await _interaccionRepository.DeleteAsync(id);
         }
 
+        // Nuevo método: obtiene solo la última interacción del usuario
+        public async Task<InteraccionChatDTO?> GetLastByUsuarioAsync(string usuarioRef)
+        {
+            var interaccion = await _interaccionRepository.GetLastByUsuarioAsync(usuarioRef);
+            return interaccion == null ? null : MapToDTO(interaccion);
+        }
+
         private static InteraccionChatDTO MapToDTO(InteraccionChat i)
         {
             return new InteraccionChatDTO

@@ -1,5 +1,4 @@
 ﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using MongoDB.Driver;
 using Onboarding.CORE.Core.Interfaces;
@@ -11,16 +10,23 @@ using Onboarding.Infrastructure.Repositories;
 using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
+// =======================================
+// 🔥 Configuración CORRECTA de HttpClient
+// =======================================
+builder.Services.AddHttpClient<OllamaClient>(client =>
+{
+    client.BaseAddress = new Uri("http://134.199.192.88:11434/"); // ⚠ tu server Ollama
+    client.Timeout = TimeSpan.FromSeconds(120);
+});
 
-// =======================
-// 🔹 CONFIGURAR MONGO DB
-// =======================
-// 1. Leer configuración desde appsettings.json
+// =======================================================
+// 🔹 CONFIGURACIÓN DE MONGO DB
+// =======================================================
 builder.Services.AddSingleton<IMongoClient>(sp =>
 {
-    var mongoConnectionString = builder.Configuration["MongoDB:ConnectionString"]
+    var connection = builder.Configuration["MongoDB:ConnectionString"]
         ?? "mongodb://localhost:27017";
-    return new MongoClient(mongoConnectionString);
+    return new MongoClient(connection);
 });
 
 builder.Services.AddScoped<IMongoDatabase>(sp =>
@@ -29,10 +35,9 @@ builder.Services.AddScoped<IMongoDatabase>(sp =>
     return client.GetDatabase("OnboardingDB");
 });
 
-
-// =======================
+// =======================================================
 // 🔹 REPOSITORIOS Y SERVICIOS
-// =======================
+// =======================================================
 builder.Services.AddScoped<IActividadRepository, ActividadRepository>();
 builder.Services.AddScoped<IActividadService, ActividadService>();
 
@@ -50,19 +55,10 @@ builder.Services.AddScoped<IRecursoService, RecursoService>();
 
 builder.Services.AddScoped<IJwtService, JwtService>();
 
-// =======================
-// 🤖 CLIENTE OLLAMA
-// =======================
-builder.Services.AddHttpClient<OllamaClient>(client =>
-{
-    client.BaseAddress = new Uri("http://134.199.192.88:11434/api/");
-    client.Timeout = TimeSpan.FromSeconds(300);
-});
 
-
-// =======================
-// 🔐 CONFIGURAR JWT
-// =======================
+// =======================================================
+// 🔐 CONFIGURACIÓN DE JWT
+// =======================================================
 var jwtKey = builder.Configuration["Jwt:Secret"] ?? "clave-secreta-super-segura-12345";
 var jwtIssuer = builder.Configuration["Jwt:Issuer"] ?? "OnboardingAPI";
 
@@ -85,9 +81,9 @@ builder.Services.AddAuthentication(options =>
     };
 });
 
-// =======================
-// 🌐 CORS (SOLUCIÓN AL ERROR "Failed to fetch")
-// =======================
+// =======================================================
+// 🌐 CORS — NECESARIO PARA SWAGGER Y FRONTEND
+// =======================================================
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowAll", policy =>
@@ -98,18 +94,21 @@ builder.Services.AddCors(options =>
     });
 });
 
-// =======================
-// 🌐 CONTROLADORES Y SWAGGER
-// =======================
+// =======================================================
+// 🌐 CONTROLADORES + SWAGGER
+// =======================================================
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
+// =======================================================
+// ⚙️ CREAR APP
+// =======================================================
 var app = builder.Build();
 
-// =======================
-// ⚙️ MIDDLEWARE
-// =======================
+// =======================================================
+// 🧩 MIDDLEWARE
+// =======================================================
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
@@ -118,18 +117,16 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
-app.UseCors("AllowAll"); // ✅ NECESARIO PARA QUE SWAGGER FUNCIONE
+app.UseCors("AllowAll");
 
 app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
 
-// =======================
-// 🚀 ARRANQUE FINAL
-// =======================
-Console.WriteLine("✅ Servidor Onboarding API iniciado correctamente...");
-Console.WriteLine("🧠 Cliente Ollama disponible en http://134.199.192.88:11434/api/");
-
+Console.WriteLine("============================================");
+Console.WriteLine("  🚀 Onboarding API Iniciada Correctamente");
+Console.WriteLine("  🤖 Ollama disponible en: http://134.199.192.88:11434/api/");
+Console.WriteLine("============================================\n");
 
 app.Run();

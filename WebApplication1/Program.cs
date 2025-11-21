@@ -131,11 +131,10 @@ var app = builder.Build();
 // =======================
 // ⚙ MIDDLEWARE
 // =======================
-if (app.Environment.IsDevelopment())
-{
-    app.UseSwagger();
-    app.UseSwaggerUI();
-}
+
+// 🔥 Habilitar Swagger SIEMPRE (también en producción)
+app.UseSwagger();
+app.UseSwaggerUI();
 
 // 🔥 Render maneja HTTPS, así que lo quitamos
 // app.UseHttpsRedirection();

@@ -9,4 +9,5 @@ public interface IUsuarioService
     Task<Usuario?> GetByIdAsync(string id);
     Task UpdateAsync(string id, UsuarioCreateDTO dto);
     Task DeleteAsync(string id);
+    Task<List<Usuario>> GetByRolRefAsync(string rolRef);
 }

@@ -1,6 +1,6 @@
-using Onboarding.CORE.Core.Interfaces;
-using Onboarding.CORE.Entities;
 using MongoDB.Driver;
+using Onboarding.CORE.Entities;
+using Onboarding.CORE.Core.Interfaces;
 using System.Threading.Tasks;
 
 namespace Onboarding.CORE.Infrastructure.Repositories
@@ -16,8 +16,7 @@ namespace Onboarding.CORE.Infrastructure.Repositories
 
         public async Task<SalaChat?> GetByUsuarioRefAsync(string usuarioRef)
         {
-            var filter = Builders<SalaChat>.Filter.Eq(s => s.UsuarioRef, usuarioRef);
-            return await _collection.Find(filter).FirstOrDefaultAsync();
+            return await _collection.Find(s => s.UsuarioRef == usuarioRef).FirstOrDefaultAsync();
         }
 
         public async Task CreateAsync(SalaChat sala)
@@ -27,14 +26,22 @@ namespace Onboarding.CORE.Infrastructure.Repositories
 
         public async Task UpdateAsync(SalaChat sala)
         {
-            var filter = Builders<SalaChat>.Filter.Eq(s => s.Id, sala.Id);
-            await _collection.ReplaceOneAsync(filter, sala);
+            await _collection.ReplaceOneAsync(s => s.Id == sala.Id, sala);
         }
 
         public async Task DeleteAsync(string usuarioRef)
         {
-            var filter = Builders<SalaChat>.Filter.Eq(s => s.UsuarioRef, usuarioRef);
-            await _collection.DeleteOneAsync(filter);
+            await _collection.DeleteOneAsync(s => s.UsuarioRef == usuarioRef);
+        }
+
+        public Task<bool> UpdateEstadoAsync(string usuarioRef, string nuevoEstado)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<bool> UpdateContextoAsync(string usuarioRef, string nuevoContexto)
+        {
+            throw new NotImplementedException();
         }
     }
 }

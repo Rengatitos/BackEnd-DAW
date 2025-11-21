@@ -1,8 +1,11 @@
+﻿using Onboarding.CORE.Core.DTOs;
+using Onboarding.CORE.Core.Entities;
 using Onboarding.CORE.Core.Interfaces;
 using Onboarding.CORE.DTOs;
 using Onboarding.CORE.Entities;
-using System.Threading.Tasks;
 using System;
+using System.Threading.Tasks;
+using SalaChatUpdateEstadoDTO = Onboarding.CORE.DTOs.SalaChatUpdateEstadoDTO;
 
 namespace Onboarding.CORE.Services
 {
@@ -15,17 +18,23 @@ namespace Onboarding.CORE.Services
             _repo = repo;
         }
 
+        // ============================================================
+        // GET – Obtener sala del usuario
+        // ============================================================
         public async Task<SalaChatDTO?> GetByUsuarioRefAsync(string usuarioRef)
         {
-            var s = await _repo.GetByUsuarioRefAsync(usuarioRef);
-            if (s == null) return null;
-            return MapToDTO(s);
+            var entity = await _repo.GetByUsuarioRefAsync(usuarioRef);
+            return entity == null ? null : MapToDTO(entity);
         }
 
+        // ============================================================
+        // CREATE – Crear una sala de chat
+        // ============================================================
         public async Task<SalaChatDTO> CreateAsync(SalaChatCreateDTO dto)
         {
             var existing = await _repo.GetByUsuarioRefAsync(dto.UsuarioRef);
-            if (existing != null) throw new Exception("Sala ya existe para este usuario");
+            if (existing != null)
+                throw new Exception("La sala para este usuario ya existe.");
 
             var sala = new SalaChat
             {
@@ -35,6 +44,7 @@ namespace Onboarding.CORE.Services
                 Correo = dto.Correo,
                 Area = dto.Area,
                 RolRef = dto.RolRef,
+
                 NivelOnboarding = new NivelOnboarding
                 {
                     Etapa = "Inicial",
@@ -42,9 +52,17 @@ namespace Onboarding.CORE.Services
                     UltimaActualizacion = DateTime.UtcNow,
                     Estado = "Activo"
                 },
-                EstadoOnboardingIA = new EstadoOnboardingIA(),
-                ContextoPersistente = string.Empty,
-                UltimoMensaje = string.Empty,
+
+                EstadoOnboardingIA = new EstadoOnboardingIA
+                {
+                    PasoActual = "Inicial",
+                    HaVistoDocumentos = false,
+                    HaConsultadoSupervisor = false,
+                    HaSolicitadoAdmin = false
+                },
+
+                ContextoPersistente = "",
+                UltimoMensaje = "",
                 UltimaActualizacion = DateTime.UtcNow
             };
 
@@ -52,20 +70,23 @@ namespace Onboarding.CORE.Services
             return MapToDTO(sala);
         }
 
+        // ============================================================
+        // UPDATE – Estado del onboarding (IA + nivel)
+        // ============================================================
         public async Task<bool> UpdateEstadoAsync(string usuarioRef, SalaChatUpdateEstadoDTO dto)
         {
-            var existing = await _repo.GetByUsuarioRefAsync(usuarioRef);
-            if (existing == null) return false;
+            var entity = await _repo.GetByUsuarioRefAsync(usuarioRef);
+            if (entity == null) return false;
 
-            existing.NivelOnboarding = new NivelOnboarding
+            entity.NivelOnboarding = new NivelOnboarding
             {
                 Etapa = dto.NivelOnboarding.Etapa,
                 Porcentaje = dto.NivelOnboarding.Porcentaje,
-                UltimaActualizacion = dto.NivelOnboarding.UltimaActualizacion,
+                UltimaActualizacion = DateTime.UtcNow,
                 Estado = dto.NivelOnboarding.Estado
             };
 
-            existing.EstadoOnboardingIA = new EstadoOnboardingIA
+            entity.EstadoOnboardingIA = new EstadoOnboardingIA
             {
                 PasoActual = dto.EstadoOnboardingIA.PasoActual,
                 HaVistoDocumentos = dto.EstadoOnboardingIA.HaVistoDocumentos,
@@ -73,34 +94,44 @@ namespace Onboarding.CORE.Services
                 HaSolicitadoAdmin = dto.EstadoOnboardingIA.HaSolicitadoAdmin
             };
 
-            existing.UltimoMensaje = dto.UltimoMensaje;
-            existing.UltimaActualizacion = DateTime.UtcNow;
+            entity.UltimoMensaje = dto.UltimoMensaje;
+            entity.UltimaActualizacion = DateTime.UtcNow;
 
-            await _repo.UpdateAsync(existing);
+            await _repo.UpdateAsync(entity);
             return true;
         }
 
+        // ============================================================
+        // UPDATE – Sólo actualizar el contexto persistente
+        // ============================================================
         public async Task<bool> UpdateContextoAsync(string usuarioRef, SalaChatUpdateContextoDTO dto)
         {
-            var existing = await _repo.GetByUsuarioRefAsync(usuarioRef);
-            if (existing == null) return false;
+            var entity = await _repo.GetByUsuarioRefAsync(usuarioRef);
+            if (entity == null) return false;
 
-            existing.ContextoPersistente = dto.ContextoPersistente;
-            existing.UltimoMensaje = dto.UltimoMensaje;
-            existing.UltimaActualizacion = DateTime.UtcNow;
+            entity.ContextoPersistente = dto.ContextoPersistente;
+            entity.UltimoMensaje = dto.UltimoMensaje;
+            entity.UltimaActualizacion = DateTime.UtcNow;
 
-            await _repo.UpdateAsync(existing);
+            await _repo.UpdateAsync(entity);
             return true;
         }
 
+        // ============================================================
+        // DELETE – Eliminar sala
+        // ============================================================
         public async Task<bool> DeleteAsync(string usuarioRef)
         {
             var existing = await _repo.GetByUsuarioRefAsync(usuarioRef);
             if (existing == null) return false;
+
             await _repo.DeleteAsync(usuarioRef);
             return true;
         }
 
+        // ============================================================
+        // MAP – Convertir Entity → DTO
+        // ============================================================
         private static SalaChatDTO MapToDTO(SalaChat s)
         {
             return new SalaChatDTO
@@ -111,6 +142,7 @@ namespace Onboarding.CORE.Services
                 Correo = s.Correo,
                 Area = s.Area,
                 RolRef = s.RolRef,
+
                 NivelOnboarding = new NivelOnboardingDTO
                 {
                     Etapa = s.NivelOnboarding.Etapa,
@@ -118,6 +150,7 @@ namespace Onboarding.CORE.Services
                     UltimaActualizacion = s.NivelOnboarding.UltimaActualizacion,
                     Estado = s.NivelOnboarding.Estado
                 },
+
                 EstadoOnboardingIA = new EstadoOnboardingIADTO
                 {
                     PasoActual = s.EstadoOnboardingIA.PasoActual,
@@ -125,10 +158,16 @@ namespace Onboarding.CORE.Services
                     HaConsultadoSupervisor = s.EstadoOnboardingIA.HaConsultadoSupervisor,
                     HaSolicitadoAdmin = s.EstadoOnboardingIA.HaSolicitadoAdmin
                 },
+
                 ContextoPersistente = s.ContextoPersistente,
                 UltimoMensaje = s.UltimoMensaje,
                 UltimaActualizacion = s.UltimaActualizacion
             };
+        }
+
+        public Task<bool> UpdateEstadoAsync(string usuarioRef, Core.Interfaces.SalaChatUpdateEstadoDTO dto)
+        {
+            throw new NotImplementedException();
         }
     }
 }

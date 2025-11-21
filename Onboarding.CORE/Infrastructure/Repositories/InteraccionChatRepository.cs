@@ -1,6 +1,9 @@
 ﻿using MongoDB.Driver;
 using Onboarding.CORE.Entities;
 using Onboarding.CORE.Core.Interfaces;
+using System.Collections.Generic;
+using System.Threading.Tasks;
+using System;
 
 namespace Onboarding.INFRA.Repositories
 {
@@ -10,7 +13,7 @@ namespace Onboarding.INFRA.Repositories
 
         public InteraccionChatRepository(IMongoDatabase database)
         {
-            _collection = database.GetCollection<InteraccionChat>("interacciones_chat"); //esta como minuscula
+            _collection = database.GetCollection<InteraccionChat>("interacciones_chat");
         }
 
         public async Task<List<InteraccionChat>> GetAllAsync()
@@ -30,6 +33,8 @@ namespace Onboarding.INFRA.Repositories
 
         public async Task<InteraccionChat?> BuscarPorPreguntaAsync(string mensajeUsuario)
         {
+            if (string.IsNullOrWhiteSpace(mensajeUsuario)) return null;
+
             return await _collection
                 .Find(i => i.MensajeUsuario.ToLower() == mensajeUsuario.ToLower())
                 .SortByDescending(i => i.FechaHora)
@@ -51,9 +56,10 @@ namespace Onboarding.INFRA.Repositories
             await _collection.DeleteOneAsync(i => i.Id == id);
         }
 
-        // Nuevo método (obtiene SOLO la última interacción del usuario)
         public async Task<InteraccionChat?> GetLastByUsuarioAsync(string usuarioRef)
         {
+            if (string.IsNullOrWhiteSpace(usuarioRef)) return null;
+
             return await _collection
                 .Find(i => i.UsuarioRef == usuarioRef)
                 .SortByDescending(i => i.FechaHora)

@@ -1,8 +1,8 @@
 using Onboarding.CORE.Core.Interfaces;
-using Onboarding.CORE.Entities;
 using MongoDB.Driver;
 using System.Threading.Tasks;
 using System.Linq;
+using Onboarding.CORE.Core.Entities;
 
 namespace Onboarding.CORE.Infrastructure.Repositories
 {
@@ -20,13 +20,12 @@ namespace Onboarding.CORE.Infrastructure.Repositories
             return await _collection.Find(_ => true).FirstOrDefaultAsync();
         }
 
-        public async Task<CatalogoOnboarding?> GetEtapaAsync(string etapaNombre)
+        public async Task<EtapaOnboarding?> GetEtapaAsync(string etapaNombre)
         {
             var catalogo = await GetCatalogoAsync();
             if (catalogo == null) return null;
             var etapa = catalogo.Etapas.FirstOrDefault(e => e.Nombre == etapaNombre);
-            if (etapa == null) return null;
-            return new CatalogoOnboarding { Id = catalogo.Id, Etapas = new System.Collections.Generic.List<EtapaOnboarding> { etapa } };
+            return etapa;
         }
 
         public async Task CreateCatalogoAsync(CatalogoOnboarding catalogo)

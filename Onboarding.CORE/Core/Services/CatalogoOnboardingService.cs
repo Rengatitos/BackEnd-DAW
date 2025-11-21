@@ -1,9 +1,11 @@
+﻿using Onboarding.CORE.Core.Entities;
 using Onboarding.CORE.Core.Interfaces;
-using Onboarding.CORE.DTOs;
+using Onboarding.CORE.Core.DTOs;
 using Onboarding.CORE.Entities;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using System.Collections.Generic;
+using Onboarding.CORE.DTOs;
 
 namespace Onboarding.CORE.Services
 {
@@ -16,70 +18,62 @@ namespace Onboarding.CORE.Services
             _repo = repo;
         }
 
+        // ============================
+        //      OBTENER CATÁLOGO
+        // ============================
         public async Task<CatalogoOnboardingDTO?> GetCatalogoAsync()
         {
-            var c = await _repo.GetCatalogoAsync();
-            if (c == null) return null;
+            var catalogo = await _repo.GetCatalogoAsync();
+            if (catalogo == null) return null;
+
             return new CatalogoOnboardingDTO
             {
-                Id = c.Id,
-                Etapas = c.Etapas.Select(e => new EtapaOnboardingDTO
-                {
-                    Nombre = e.Nombre,
-                    Descripcion = e.Descripcion,
-                    Documentos = e.Documentos,
-                    Urls = e.Urls,
-                    ProximosPasos = e.ProximosPasos,
-                    Consejos = e.Consejos
-                }).ToList()
+                Id = catalogo.Id,
+                Etapas = catalogo.Etapas.Select(MapToDTO).ToList()
             };
         }
 
-        public async Task<EtapaOnboardingDTO?> GetEtapaAsync(string etapaNombre)
+        // ============================
+        //      OBTENER UNA ETAPA
+        // ============================
+        public async Task<DTOs.EtapaOnboardingDTO?> GetEtapaAsync(string etapaNombre)
         {
-            var e = await _repo.GetEtapaAsync(etapaNombre);
-            if (e == null) return null;
-            return new EtapaOnboardingDTO
-            {
-                Nombre = e.Nombre,
-                Descripcion = e.Descripcion,
-                Documentos = e.Documentos,
-                Urls = e.Urls,
-                ProximosPasos = e.ProximosPasos,
-                Consejos = e.Consejos
-            };
+            var etapa = await _repo.GetEtapaAsync(etapaNombre);
+            if (etapa == null) return null;
+
+            return MapToDTO(etapa);
         }
 
-        public async Task CreateCatalogoAsync(CatalogoOnboardingCreateDTO dto)
+        // ============================
+        //      CREAR CATÁLOGO
+        // ============================
+        public async Task CreateCatalogoAsync(DTOs.CatalogoOnboardingCreateItemDTO dto)
         {
             var existing = await _repo.GetCatalogoAsync();
-            if (existing != null) throw new System.Exception("Catalogo ya existe");
+            if (existing != null)
+                throw new System.Exception("❌ Ya existe un catálogo creado. Solo puede existir uno.");
 
             var catalogo = new CatalogoOnboarding
             {
                 Id = "catalogo_onboarding",
-                Etapas = dto.Etapas.Select(e => new EtapaOnboarding
-                {
-                    Nombre = e.Nombre,
-                    Descripcion = e.Descripcion,
-                    Documentos = e.Documentos,
-                    Urls = e.Urls,
-                    ProximosPasos = e.ProximosPasos,
-                    Consejos = e.Consejos
-                }).ToList()
+                Etapas = dto.Etapas.Select(MapToEntity).ToList()
             };
 
             await _repo.CreateCatalogoAsync(catalogo);
         }
 
-        public async Task<bool> UpdateEtapaAsync(string etapaNombre, CatalogoOnboardingUpdateEtapaDTO dto)
+        // ============================
+        //     ACTUALIZAR UNA ETAPA
+        // ============================
+        public async Task<bool> UpdateEtapaAsync(string etapaNombre, DTOs.CatalogoOnboardingUpdateEtapaDTO dto)
         {
-            var existing = await _repo.GetCatalogoAsync();
-            if (existing == null) return false;
-            var etapa = existing.Etapas.FirstOrDefault(x => x.Nombre == etapaNombre);
-            if (etapa == null) return false;
+            var catalogo = await _repo.GetCatalogoAsync();
+            if (catalogo == null) return false;
 
-            var nueva = new EtapaOnboarding
+            var etapaExistente = catalogo.Etapas.FirstOrDefault(e => e.Nombre == etapaNombre);
+            if (etapaExistente == null) return false;
+
+            var nuevaEtapa = new EtapaOnboarding
             {
                 Nombre = dto.Nombre,
                 Descripcion = dto.Descripcion,
@@ -89,18 +83,52 @@ namespace Onboarding.CORE.Services
                 Consejos = dto.Consejos
             };
 
-            await _repo.UpdateEtapaAsync(etapaNombre, nueva);
+            await _repo.UpdateEtapaAsync(etapaNombre, nuevaEtapa);
             return true;
         }
 
+        // ============================
+        //     ELIMINAR UNA ETAPA
+        // ============================
         public async Task<bool> DeleteEtapaAsync(string etapaNombre)
         {
-            var existing = await _repo.GetCatalogoAsync();
-            if (existing == null) return false;
-            var etapa = existing.Etapas.FirstOrDefault(x => x.Nombre == etapaNombre);
+            var catalogo = await _repo.GetCatalogoAsync();
+            if (catalogo == null) return false;
+
+            var etapa = catalogo.Etapas.FirstOrDefault(e => e.Nombre == etapaNombre);
             if (etapa == null) return false;
+
             await _repo.DeleteEtapaAsync(etapaNombre);
             return true;
+        }
+
+        // ============================
+        //         MAPEO DTO
+        // ============================
+        private DTOs.EtapaOnboardingDTO MapToDTO(EtapaOnboarding e)
+        {
+            return new DTOs.EtapaOnboardingDTO
+            {
+                Nombre = e.Nombre,
+                Descripcion = e.Descripcion,
+                Documentos = e.Documentos ?? new List<string>(),
+                Urls = e.Urls ?? new List<string>(),
+                ProximosPasos = e.ProximosPasos ?? new List<string>(),
+                Consejos = e.Consejos ?? new List<string>()
+            };
+        }
+
+        private EtapaOnboarding MapToEntity(DTOs.EtapaOnboardingDTO e)
+        {
+            return new EtapaOnboarding
+            {
+                Nombre = e.Nombre,
+                Descripcion = e.Descripcion,
+                Documentos = e.Documentos ?? new List<string>(),
+                Urls = e.Urls ?? new List<string>(),
+                ProximosPasos = e.ProximosPasos ?? new List<string>(),
+                Consejos = e.Consejos ?? new List<string>()
+            };
         }
     }
 }

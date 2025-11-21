@@ -1,6 +1,6 @@
-using Onboarding.CORE.DTOs;
 using System.Threading.Tasks;
 using System.Collections.Generic;
+using Onboarding.CORE.DTOs;
 
 namespace Onboarding.CORE.Core.Interfaces
 {
@@ -8,7 +8,7 @@ namespace Onboarding.CORE.Core.Interfaces
     {
         Task<CatalogoOnboardingDTO?> GetCatalogoAsync();
         Task<EtapaOnboardingDTO?> GetEtapaAsync(string etapaNombre);
-        Task CreateCatalogoAsync(CatalogoOnboardingCreateDTO dto);
+        Task CreateCatalogoAsync(CatalogoOnboardingCreateItemDTO dto);
         Task<bool> UpdateEtapaAsync(string etapaNombre, CatalogoOnboardingUpdateEtapaDTO dto);
         Task<bool> DeleteEtapaAsync(string etapaNombre);
     }

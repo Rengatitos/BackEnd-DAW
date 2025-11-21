@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Mvc;
 using Onboarding.CORE.Core.Interfaces;
 using Onboarding.CORE.DTOs;
 using System.Threading.Tasks;
+using SalaChatUpdateEstadoDTO = Onboarding.CORE.DTOs.SalaChatUpdateEstadoDTO;
 
 namespace Onboarding.Api.Controllers
 {

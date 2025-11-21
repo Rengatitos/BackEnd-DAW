@@ -15,11 +15,11 @@ namespace Onboarding.CORE.DTOs
 
     public class CatalogoOnboardingDTO
     {
-        public string Id { get; set; } = "catalogo_onboarding";
+        public string Id { get; set; } = string.Empty;
         public List<EtapaOnboardingDTO> Etapas { get; set; } = new();
     }
 
-    public class CatalogoOnboardingCreateDTO
+    public class CatalogoOnboardingCreateItemDTO
     {
         public List<EtapaOnboardingDTO> Etapas { get; set; } = new();
     }

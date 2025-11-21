@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
+using Onboarding.CORE.Core.DTOs;
 using Onboarding.CORE.Core.Interfaces;
 using Onboarding.CORE.DTOs;
 using System.Threading.Tasks;
@@ -33,7 +34,7 @@ namespace Onboarding.Api.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> CreateCatalogo([FromBody] CatalogoOnboardingCreateDTO dto)
+        public async Task<IActionResult> CreateCatalogo([FromBody] CatalogoOnboardingCreateItemDTO dto)
         {
             try
             {

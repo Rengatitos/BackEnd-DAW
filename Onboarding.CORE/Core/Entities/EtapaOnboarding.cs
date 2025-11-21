@@ -2,7 +2,7 @@ using System.Collections.Generic;
 using MongoDB.Bson.Serialization.Attributes;
 using MongoDB.Bson;
 
-namespace Onboarding.CORE.Entities
+namespace Onboarding.CORE.Core.Entities
 {
     public class EtapaOnboarding
     {

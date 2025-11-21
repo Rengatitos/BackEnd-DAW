@@ -1,5 +1,5 @@
 using MongoDB.Bson.Serialization.Attributes;
-using MongoDB.Bson;
+using Onboarding.CORE.Core.Entities;
 using System;
 
 namespace Onboarding.CORE.Entities
@@ -7,7 +7,7 @@ namespace Onboarding.CORE.Entities
     public class SalaChat
     {
         [BsonId]
-        public string Id { get; set; } = string.Empty; // will be 'sala_{usuarioRef}'
+        public string Id { get; set; } = string.Empty;
 
         [BsonElement("usuarioRef")]
         public string UsuarioRef { get; set; } = string.Empty;

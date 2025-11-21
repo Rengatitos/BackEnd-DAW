@@ -7,26 +7,37 @@ using Onboarding.CORE.Services;
 using Onboarding.CORE.Settings;
 using Onboarding.INFRA.Repositories;
 using Onboarding.Infrastructure.Repositories;
+
 using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// =======================
+// =======================================================
 // 🌍 Render: Puerto dinámico
-// =======================
+// =======================================================
 builder.WebHost.UseUrls($"http://0.0.0.0:{Environment.GetEnvironmentVariable("PORT")}");
 
-// =======================
-// ⚙ Cargar variables de entorno
-// =======================
+// =======================================================
+// 🔧 Cargar variables de entorno
+// =======================================================
 builder.Configuration.AddEnvironmentVariables();
 
-// =======================
-// 🔹 CONFIGURAR MONGO DB
-// =======================
+// =======================================================
+// 🤖 CONFIGURAR CLIENTE OLLAMA (fusión de ambos codes)
+// =======================================================
+builder.Services.AddHttpClient<OllamaClient>(client =>
+{
+    client.BaseAddress = new Uri("http://134.199.192.88:11434/api/");
+    client.Timeout = TimeSpan.FromSeconds(300);
+});
+
+// =======================================================
+// 🔹 CONFIGURACIÓN DE MONGO DB (fusionado)
+// =======================================================
 builder.Services.AddSingleton<IMongoClient>(sp =>
 {
-    var mongoConnectionString = builder.Configuration.GetValue<string>("MongoDB:ConnectionString")
+    var mongoConnectionString =
+        builder.Configuration.GetValue<string>("MongoDB:ConnectionString")
         ?? builder.Configuration["MONGODB_CONNECTIONSTRING"]
         ?? "mongodb://localhost:27017";
 
@@ -36,16 +47,17 @@ builder.Services.AddSingleton<IMongoClient>(sp =>
 builder.Services.AddScoped<IMongoDatabase>(sp =>
 {
     var client = sp.GetRequiredService<IMongoClient>();
-    var databaseName = builder.Configuration.GetValue<string>("MongoDB:DatabaseName")
+    var dbName =
+        builder.Configuration.GetValue<string>("MongoDB:DatabaseName")
         ?? builder.Configuration["MONGODB_DATABASENAME"]
         ?? "OnboardingDB";
 
-    return client.GetDatabase(databaseName);
+    return client.GetDatabase(dbName);
 });
 
-// =======================
-// 🔹 REPOSITORIOS Y SERVICIOS
-// =======================
+// =======================================================
+// 🔹 REPOSITORIOS Y SERVICIOS (combinado de ambos codes)
+// =======================================================
 builder.Services.AddScoped<IActividadRepository, ActividadRepository>();
 builder.Services.AddScoped<IActividadService, ActividadService>();
 
@@ -63,18 +75,16 @@ builder.Services.AddScoped<IRecursoService, RecursoService>();
 
 builder.Services.AddScoped<IJwtService, JwtService>();
 
-// =======================
-// 🤖 CLIENTE OLLAMA
-// =======================
-builder.Services.AddHttpClient<OllamaClient>(client =>
-{
-    client.BaseAddress = new Uri("http://134.199.192.88:11434/api/");
-    client.Timeout = TimeSpan.FromSeconds(300);
-});
+//// Extra que el primer Program.cs tenía:
+//builder.Services.AddScoped<ICatalogoOnboardingRepository, CatalogoOnboardingRepository>();
+//builder.Services.AddScoped<ICatalogoOnboardingService, CatalogoOnboardingService>();
 
-// =======================
-// 🔐 CONFIGURAR JWT (Corregido)
-// =======================
+//builder.Services.AddScoped<ISalasChatRepository, SalasChatRepository>();
+//builder.Services.AddScoped<ISalasChatService, SalasChatService>();
+
+// =======================================================
+// 🔐 JWT — Fusión correcta
+// =======================================================
 var jwtKey = builder.Configuration["Jwt:Secret"]
     ?? builder.Configuration["JWT_SECRET"]
     ?? "clave-secreta-prueba-12345";
@@ -106,9 +116,9 @@ builder.Services.AddAuthentication(options =>
     };
 });
 
-// =======================
-// 🌐 CORS (SOLUCIÓN "Failed to fetch")
-// =======================
+// =======================================================
+// 🌐 CORS (para frontend y swagger)
+// =======================================================
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowAll", policy =>
@@ -119,35 +129,33 @@ builder.Services.AddCors(options =>
     });
 });
 
-// =======================
-// 🌐 CONTROLADORES Y SWAGGER
-// =======================
+// =======================================================
+// 🌐 CONTROLADORES + SWAGGER
+// =======================================================
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
 var app = builder.Build();
 
-// =======================
-// ⚙ MIDDLEWARE
-// =======================
+// =======================================================
+// 🧩 MIDDLEWARE
+// =======================================================
 
-// 🔥 Habilitar Swagger SIEMPRE (también en producción)
+// Swagger siempre habilitado (Render lo permite)
 app.UseSwagger();
 app.UseSwaggerUI();
 
-// 🔥 Render maneja HTTPS, así que lo quitamos
+// Render maneja HTTPS, así que no usar redirección
 // app.UseHttpsRedirection();
 
 app.UseCors("AllowAll");
+
 app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
 
-// =======================
-// 🚀 INICIO
-// =======================
 Console.WriteLine("==============================================");
 Console.WriteLine("🚀 Onboarding API iniciada correctamente");
 Console.WriteLine("🧠 Cliente Ollama: http://134.199.192.88:11434/api/");

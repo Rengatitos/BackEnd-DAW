@@ -8,13 +8,12 @@
 
 	<ItemGroup>
 		<PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="6.0.0" />
-		<PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="6.0.9" />
 		<PackageReference Include="Microsoft.Extensions.Configuration.Binder" Version="6.0.0" />
 		<PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="6.0.0" />
 		<PackageReference Include="Microsoft.Extensions.Options" Version="6.0.0" />
 		<PackageReference Include="Microsoft.IdentityModel.Tokens" Version="6.14.0" />
 		<PackageReference Include="MongoDB.Driver" Version="2.15.0" />
-		<PackageReference Include="OllamaSharp" Version="2.4.10" />
+		<!-- OllamaSharp removido: se usa el cliente HTTP propio en Onboarding.CORE -->
 		<PackageReference Include="Swashbuckle.AspNetCore" Version="6.5.0" />
 		<PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="6.14.0" />
 	</ItemGroup>

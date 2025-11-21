@@ -12,23 +12,24 @@ using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
+// Añadir soporte para variables de entorno
+builder.Configuration.AddEnvironmentVariables();
+
 // =======================
 // 🔹 CONFIGURAR MONGO DB
 // =======================
-// 1. Leer configuración desde appsettings.json
 builder.Services.AddSingleton<IMongoClient>(sp =>
 {
-    var mongoConnectionString = builder.Configuration["MongoDB:ConnectionString"]
-        ?? "mongodb://localhost:27017";
+    var mongoConnectionString = builder.Configuration["MONGODB_CONNECTIONSTRING"]
+        ?? "mongodb://localhost:27017"; // Valor por defecto para desarrollo
     return new MongoClient(mongoConnectionString);
 });
 
 builder.Services.AddScoped<IMongoDatabase>(sp =>
 {
     var client = sp.GetRequiredService<IMongoClient>();
-    return client.GetDatabase("OnboardingDB");
+    return client.GetDatabase(builder.Configuration["MONGODB_DATABASENAME"] ?? "OnboardingDB");
 });
-
 
 // =======================
 // 🔹 REPOSITORIOS Y SERVICIOS
@@ -59,12 +60,11 @@ builder.Services.AddHttpClient<OllamaClient>(client =>
     client.Timeout = TimeSpan.FromSeconds(300);
 });
 
-
 // =======================
 // 🔐 CONFIGURAR JWT
 // =======================
-var jwtKey = builder.Configuration["Jwt:Secret"] ?? "clave-secreta-super-segura-12345";
-var jwtIssuer = builder.Configuration["Jwt:Issuer"] ?? "OnboardingAPI";
+var jwtKey = builder.Configuration["JWT_SECRET"] ?? "clave-secreta-prueba-12345";
+var jwtIssuer = builder.Configuration["JWT_ISSUER"] ?? "OnboardingAPI";
 
 builder.Services.AddAuthentication(options =>
 {
@@ -80,7 +80,7 @@ builder.Services.AddAuthentication(options =>
         ValidateLifetime = true,
         ValidateIssuerSigningKey = true,
         ValidIssuer = jwtIssuer,
-        ValidAudience = builder.Configuration["Jwt:Audience"],
+        ValidAudience = builder.Configuration["JWT_AUDIENCE"],
         IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtKey))
     };
 });
@@ -108,7 +108,7 @@ builder.Services.AddSwaggerGen();
 var app = builder.Build();
 
 // =======================
-// ⚙️ MIDDLEWARE
+// ⚙ MIDDLEWARE
 // =======================
 if (app.Environment.IsDevelopment())
 {
@@ -130,6 +130,5 @@ app.MapControllers();
 // =======================
 Console.WriteLine("✅ Servidor Onboarding API iniciado correctamente...");
 Console.WriteLine("🧠 Cliente Ollama disponible en http://134.199.192.88:11434/api/");
-
 
 app.Run();

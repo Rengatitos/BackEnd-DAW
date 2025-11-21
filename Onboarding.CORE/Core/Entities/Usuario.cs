@@ -1,5 +1,6 @@
 ﻿using MongoDB.Bson;
 using MongoDB.Bson.Serialization.Attributes;
+using System;
 
 namespace Onboarding.CORE.Entities
 {
@@ -51,5 +52,8 @@ namespace Onboarding.CORE.Entities
         [BsonElement("ultima_actualizacion")]
         [BsonDateTimeOptions(Kind = DateTimeKind.Utc)]
         public DateTime UltimaActualizacion { get; set; } = DateTime.UtcNow;
+
+        [BsonElement("estado")]
+        public string Estado { get; set; } = "Activo";
     }
 }

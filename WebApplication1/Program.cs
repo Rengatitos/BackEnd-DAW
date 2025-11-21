@@ -7,6 +7,7 @@ using Onboarding.CORE.Services;
 using Onboarding.CORE.Settings;
 using Onboarding.INFRA.Repositories;
 using Onboarding.Infrastructure.Repositories;
+using Onboarding.CORE.Infrastructure.Repositories;
 using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -55,6 +56,12 @@ builder.Services.AddScoped<IRecursoService, RecursoService>();
 
 builder.Services.AddScoped<IJwtService, JwtService>();
 
+// Register new CatalogoOnboarding and SalasChat services and repositories
+builder.Services.AddScoped<ICatalogoOnboardingRepository, CatalogoOnboardingRepository>();
+builder.Services.AddScoped<ICatalogoOnboardingService, CatalogoOnboardingService>();
+
+builder.Services.AddScoped<ISalasChatRepository, SalasChatRepository>();
+builder.Services.AddScoped<ISalasChatService, SalasChatService>();
 
 // =======================================================
 // 🔐 CONFIGURACIÓN DE JWT

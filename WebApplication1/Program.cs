@@ -20,7 +20,10 @@ builder.Configuration.AddEnvironmentVariables();
 // =======================
 builder.Services.AddSingleton<IMongoClient>(sp =>
 {
-    var mongoConnectionString = builder.Configuration["MONGODB_CONNECTIONSTRING"]
+    // Priorizar configuración en appsettings.json (sección "MongoDB"),
+    // luego variables de entorno "MONGODB_CONNECTIONSTRING", y por último valor por defecto.
+    var mongoConnectionString = builder.Configuration.GetValue<string>("MongoDB:ConnectionString")
+        ?? builder.Configuration["MONGODB_CONNECTIONSTRING"]
         ?? "mongodb://localhost:27017"; // Valor por defecto para desarrollo
     return new MongoClient(mongoConnectionString);
 });
@@ -28,7 +31,10 @@ builder.Services.AddSingleton<IMongoClient>(sp =>
 builder.Services.AddScoped<IMongoDatabase>(sp =>
 {
     var client = sp.GetRequiredService<IMongoClient>();
-    return client.GetDatabase(builder.Configuration["MONGODB_DATABASENAME"] ?? "OnboardingDB");
+    var databaseName = builder.Configuration.GetValue<string>("MongoDB:DatabaseName")
+        ?? builder.Configuration["MONGODB_DATABASENAME"]
+        ?? "OnboardingDB";
+    return client.GetDatabase(databaseName);
 });
 
 // =======================

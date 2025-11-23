@@ -10,5 +10,6 @@ namespace Onboarding.CORE.Core.Interfaces
         Task<Usuario?> GetByCorreoAsync(string correo);
         Task<Usuario?> GetByIdAsync(string id);
         Task UpdateAsync(string id, Usuario usuario);
+        Task<List<Usuario>> GetByRolRefAsync(string rolRef);
     }
 }

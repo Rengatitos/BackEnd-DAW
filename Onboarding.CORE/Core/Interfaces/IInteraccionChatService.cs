@@ -11,5 +11,6 @@ namespace Onboarding.CORE.Core.Interfaces
         Task<InteraccionChatDTO?> GetByIdAsync(string id);
         Task<List<InteraccionChatDTO>> GetByUsuarioAsync(string usuarioRef);
         Task CreateAsync(InteraccionChatCreateDTO dto);
+        Task<InteraccionChatDTO?> GetLastByUsuarioAsync(string usuarioRef);
     }
 }

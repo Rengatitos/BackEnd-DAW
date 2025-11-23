@@ -11,5 +11,6 @@ namespace Onboarding.CORE.Core.Interfaces
         Task CreateAsync(InteraccionChat interaccion);
         Task UpdateAsync(InteraccionChat interaccion);
         Task DeleteAsync(string id);
+        Task<InteraccionChat?> GetLastByUsuarioAsync(string usuarioRef);
     }
 }

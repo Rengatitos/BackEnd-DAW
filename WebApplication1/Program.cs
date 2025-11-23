@@ -11,37 +11,23 @@ using Onboarding.Infrastructure.Repositories;
 using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
-
-// =======================================================
-// 🌍 Render: Puerto dinámico
-// =======================================================
-builder.WebHost.UseUrls($"http://0.0.0.0:{Environment.GetEnvironmentVariable("PORT")}");
-
-// =======================================================
-// 🔧 Cargar variables de entorno
-// =======================================================
-builder.Configuration.AddEnvironmentVariables();
-
-// =======================================================
-// 🤖 CONFIGURAR CLIENTE OLLAMA (fusión de ambos codes)
-// =======================================================
+// =======================================
+// 🔥 Configuración CORRECTA de HttpClient
+// =======================================
 builder.Services.AddHttpClient<OllamaClient>(client =>
 {
-    client.BaseAddress = new Uri("http://134.199.192.88:11434/api/");
-    client.Timeout = TimeSpan.FromSeconds(300);
+    client.BaseAddress = new Uri("http://134.199.192.88:11434/"); // ⚠ tu server Ollama
+    client.Timeout = TimeSpan.FromSeconds(120);
 });
 
 // =======================================================
-// 🔹 CONFIGURACIÓN DE MONGO DB (fusionado)
+// 🔹 CONFIGURACIÓN DE MONGO DB
 // =======================================================
 builder.Services.AddSingleton<IMongoClient>(sp =>
 {
-    var mongoConnectionString =
-        builder.Configuration.GetValue<string>("MongoDB:ConnectionString")
-        ?? builder.Configuration["MONGODB_CONNECTIONSTRING"]
+    var connection = builder.Configuration["MongoDB:ConnectionString"]
         ?? "mongodb://localhost:27017";
-
-    return new MongoClient(mongoConnectionString);
+    return new MongoClient(connection);
 });
 
 builder.Services.AddScoped<IMongoDatabase>(sp =>
@@ -75,27 +61,18 @@ builder.Services.AddScoped<IRecursoService, RecursoService>();
 
 builder.Services.AddScoped<IJwtService, JwtService>();
 
-//// Extra que el primer Program.cs tenía:
-//builder.Services.AddScoped<ICatalogoOnboardingRepository, CatalogoOnboardingRepository>();
-//builder.Services.AddScoped<ICatalogoOnboardingService, CatalogoOnboardingService>();
+// Register new CatalogoOnboarding and SalasChat services and repositories
+builder.Services.AddScoped<ICatalogoOnboardingRepository, CatalogoOnboardingRepository>();
+builder.Services.AddScoped<ICatalogoOnboardingService, CatalogoOnboardingService>();
 
-//builder.Services.AddScoped<ISalasChatRepository, SalasChatRepository>();
-//builder.Services.AddScoped<ISalasChatService, SalasChatService>();
+builder.Services.AddScoped<ISalasChatRepository, SalasChatRepository>();
+builder.Services.AddScoped<ISalasChatService, SalasChatService>();
 
 // =======================================================
-// 🔐 JWT — Fusión correcta
+// 🔐 CONFIGURACIÓN DE JWT
 // =======================================================
-var jwtKey = builder.Configuration["Jwt:Secret"]
-    ?? builder.Configuration["JWT_SECRET"]
-    ?? "clave-secreta-prueba-12345";
-
-var jwtIssuer = builder.Configuration["Jwt:Issuer"]
-    ?? builder.Configuration["JWT_ISSUER"]
-    ?? "OnboardingAPI";
-
-var jwtAudience = builder.Configuration["Jwt:Audience"]
-    ?? builder.Configuration["JWT_AUDIENCE"]
-    ?? "OnboardingFrontend";
+var jwtKey = builder.Configuration["Jwt:Secret"] ?? "clave-secreta-super-segura-12345";
+var jwtIssuer = builder.Configuration["Jwt:Issuer"] ?? "OnboardingAPI";
 
 builder.Services.AddAuthentication(options =>
 {
@@ -136,18 +113,23 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
+// =======================================================
+// ⚙️ CREAR APP
+// =======================================================
 var app = builder.Build();
 
 // =======================================================
 // 🧩 MIDDLEWARE
 // =======================================================
+if (app.Environment.IsDevelopment())
+{
+    app.UseSwagger();
+    app.UseSwaggerUI();
+}
 
 // Swagger siempre habilitado (Render lo permite)
 app.UseSwagger();
 app.UseSwaggerUI();
-
-// Render maneja HTTPS, así que no usar redirección
-// app.UseHttpsRedirection();
 
 app.UseCors("AllowAll");
 

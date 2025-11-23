@@ -47,5 +47,10 @@ namespace Onboarding.Infrastructure.Repositories
             var objectId = ObjectId.Parse(id);
             await _collection.DeleteOneAsync(u => u.Id == objectId);
         }
+
+        public async Task<List<Usuario>> GetByRolRefAsync(string rolRef)
+        {
+            return await _collection.Find(u => u.RolRef == rolRef).ToListAsync();
+        }
     }
 }

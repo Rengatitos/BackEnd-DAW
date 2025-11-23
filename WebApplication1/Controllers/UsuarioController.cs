@@ -55,7 +55,21 @@ namespace Onboarding.Api.Controllers
             return Ok(usuarios);
         }
 
+        // ============================================================
+        // 🔎 Obtener usuarios por rolRef (acepta 'empleado' y 'administrador' como alias)
+        // ============================================================
+        [HttpGet("rol/{rolRef}")]
+        public async Task<IActionResult> GetByRol(string rolRef)
+        {
+            // Mapear alias a IDs específicos
+            if (rolRef == "empleado")
+                rolRef = "6913adbcca79acfd93858d5d";
+            else if (rolRef == "administrador")
+                rolRef = "6913adbcca79acfd93858d5c";
 
+            var usuarios = await _usuarioService.GetByRolRefAsync(rolRef);
+            return Ok(usuarios);
+        }
 
         // ============================================================
         // ➕ CREAR NUEVO USUARIO (solo ADMIN)

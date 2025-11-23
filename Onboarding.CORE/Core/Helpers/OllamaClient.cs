@@ -61,7 +61,7 @@ namespace Onboarding.CORE.Helpers
                         .Replace("\r", "\\r")
                         .Replace("\n", "\\n");
 
-                    return $"⚠ Error ({response.StatusCode}): {safe}";
+                    return $"⚠️ Error ({response.StatusCode}): {safe}";
                 }
 
                 // Parseo de respuesta JSON

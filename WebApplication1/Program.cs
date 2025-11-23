@@ -45,12 +45,9 @@ builder.Services.AddHttpClient<OllamaClient>(client =>
 // =======================================================
 builder.Services.AddSingleton<IMongoClient>(sp =>
 {
-    var mongoConnectionString =
-        builder.Configuration.GetValue<string>("MongoDB:ConnectionString")
-        ?? builder.Configuration["MONGODB_CONNECTIONSTRING"]
+    var connection = builder.Configuration["MongoDB:ConnectionString"]
         ?? "mongodb://localhost:27017";
-
-    return new MongoClient(mongoConnectionString);
+    return new MongoClient(connection);
 });
 
 builder.Services.AddScoped<IMongoDatabase>(sp =>
@@ -170,11 +167,19 @@ builder.Services.AddSwaggerGen(c =>
     });
 });
 
+// =======================================================
+// ⚙️ CREAR APP
+// =======================================================
 var app = builder.Build();
 
 // =======================================================
 // 🧩 MIDDLEWARE
 // =======================================================
+if (app.Environment.IsDevelopment())
+{
+    app.UseSwagger();
+    app.UseSwaggerUI();
+}
 
 app.UseSwagger();
 app.UseSwaggerUI();

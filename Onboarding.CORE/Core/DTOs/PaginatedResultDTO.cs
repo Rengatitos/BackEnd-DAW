@@ -1,4 +1,4 @@
-namespace Onboarding.CORE.DTOs
+namespace Onboarding.CORE.Core.DTOs
 {
     public class PaginatedResultDTO<T>
     {

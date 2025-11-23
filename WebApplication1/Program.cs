@@ -7,7 +7,7 @@ using Onboarding.CORE.Services;
 using Onboarding.CORE.Settings;
 using Onboarding.INFRA.Repositories;
 using Onboarding.Infrastructure.Repositories;
-using Onboarding.CORE.Infrastructure.Repositories;
+
 using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -33,11 +33,16 @@ builder.Services.AddSingleton<IMongoClient>(sp =>
 builder.Services.AddScoped<IMongoDatabase>(sp =>
 {
     var client = sp.GetRequiredService<IMongoClient>();
-    return client.GetDatabase("OnboardingDB");
+    var dbName =
+        builder.Configuration.GetValue<string>("MongoDB:DatabaseName")
+        ?? builder.Configuration["MONGODB_DATABASENAME"]
+        ?? "OnboardingDB";
+
+    return client.GetDatabase(dbName);
 });
 
 // =======================================================
-// 🔹 REPOSITORIOS Y SERVICIOS
+// 🔹 REPOSITORIOS Y SERVICIOS (combinado de ambos codes)
 // =======================================================
 builder.Services.AddScoped<IActividadRepository, ActividadRepository>();
 builder.Services.AddScoped<IActividadService, ActividadService>();
@@ -83,13 +88,13 @@ builder.Services.AddAuthentication(options =>
         ValidateLifetime = true,
         ValidateIssuerSigningKey = true,
         ValidIssuer = jwtIssuer,
-        ValidAudience = builder.Configuration["Jwt:Audience"],
+        ValidAudience = jwtAudience,
         IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtKey))
     };
 });
 
 // =======================================================
-// 🌐 CORS — NECESARIO PARA SWAGGER Y FRONTEND
+// 🌐 CORS (para frontend y swagger)
 // =======================================================
 builder.Services.AddCors(options =>
 {
@@ -122,7 +127,9 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
-app.UseHttpsRedirection();
+// Swagger siempre habilitado (Render lo permite)
+app.UseSwagger();
+app.UseSwaggerUI();
 
 app.UseCors("AllowAll");
 
@@ -131,9 +138,9 @@ app.UseAuthorization();
 
 app.MapControllers();
 
-Console.WriteLine("============================================");
-Console.WriteLine("  🚀 Onboarding API Iniciada Correctamente");
-Console.WriteLine("  🤖 Ollama disponible en: http://134.199.192.88:11434/api/");
-Console.WriteLine("============================================\n");
+Console.WriteLine("==============================================");
+Console.WriteLine("🚀 Onboarding API iniciada correctamente");
+Console.WriteLine("🧠 Cliente Ollama: http://134.199.192.88:11434/api/");
+Console.WriteLine("==============================================");
 
 app.Run();

@@ -1,0 +1,1 @@
+web: dotnet Onboarding.CORE.dll

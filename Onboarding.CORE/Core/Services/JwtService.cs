@@ -16,9 +16,13 @@ public class JwtService : IJwtService
 
     public string GenerateToken(string userId, string userName, string role)
     {
-        var secret = _config["Jwt:Secret"];
-        var issuer = _config["Jwt:Issuer"];
-        var audience = _config["Jwt:Audience"];
+        // 📌 Priorizar variables de entorno > luego appsettings.json
+        var secret = _config["JWT_SECRET"] ?? _config["Jwt:Secret"];
+        var issuer = _config["JWT_ISSUER"] ?? _config["Jwt:Issuer"];
+        var audience = _config["JWT_AUDIENCE"] ?? _config["Jwt:Audience"];
+
+        if (string.IsNullOrEmpty(secret))
+            throw new Exception("⚠ No se encontró JWT_SECRET ni Jwt:Secret en la configuración.");
 
         var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secret));
         var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
@@ -31,9 +35,9 @@ public class JwtService : IJwtService
         };
 
         var token = new JwtSecurityToken(
-            issuer,
-            audience,
-            claims,
+            issuer: issuer,
+            audience: audience,
+            claims: claims,
             expires: DateTime.UtcNow.AddHours(2),
             signingCredentials: creds
         );

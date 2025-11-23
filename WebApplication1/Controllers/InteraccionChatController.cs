@@ -27,6 +27,14 @@ namespace Onboarding.Api.Controllers
             _ollamaClient = ollamaClient;
             _logger = logger;
         }
+        [HttpGet("render-ip")]
+        public async Task<IActionResult> GetRenderIp()
+        {
+            using var http = new HttpClient();
+            var ip = await http.GetStringAsync("https://api.ipify.org");
+            return Ok(new { outbound_ip = ip });
+        }
+
 
         /// <summary>
         /// Procesa un mensaje del usuario, obtiene respuesta de Ollama (prompt ligero),

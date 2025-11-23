@@ -1,31 +1,55 @@
 ﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
+using Microsoft.OpenApi.Models;
 using MongoDB.Driver;
+// =======================================================
+// 📦 USINGS (Importación de tus carpetas)
+// =======================================================
+// Si alguna línea marca rojo, bórrala y deja la que funcione según tu estructura de carpetas.
+
 using Onboarding.CORE.Core.Interfaces;
 using Onboarding.CORE.Helpers;
+using Onboarding.CORE.Infrastructure.Repositories;
 using Onboarding.CORE.Services;
-using Onboarding.CORE.Settings;
+// A veces los repositorios están en INFRA o Infrastructure, dejo ambos por si acaso:
 using Onboarding.INFRA.Repositories;
 using Onboarding.Infrastructure.Repositories;
-using Onboarding.CORE.Infrastructure.Repositories;
 using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
-// =======================================
-// 🔥 Configuración CORRECTA de HttpClient
-// =======================================
+
+// =======================================================
+// 🌍 1. CONFIGURACIÓN DE PUERTO (Vital para Render)
+// =======================================================
+// Render asigna un puerto dinámico en la variable PORT. Si no existe, usa el 8080.
+var port = Environment.GetEnvironmentVariable("PORT") ?? "8080";
+builder.WebHost.UseUrls($"http://0.0.0.0:{port}");
+
+// Cargar variables de entorno del sistema
+builder.Configuration.AddEnvironmentVariables();
+
+// =======================================================
+// 🤖 2. CLIENTE OLLAMA (Configuración Dual)
+// =======================================================
+// Intenta leer la variable de Render. Si no existe, usa tu IP de respaldo.
+var ollamaUrl = builder.Configuration["Ollama:BaseUrl"] ?? "http://134.199.192.88:11434/api/";
+
 builder.Services.AddHttpClient<OllamaClient>(client =>
 {
-    client.BaseAddress = new Uri("http://134.199.192.88:11434/"); // ⚠ tu server Ollama
-    client.Timeout = TimeSpan.FromSeconds(120);
+    // Aseguramos que termine en '/' para evitar errores de ruta
+    if (!ollamaUrl.EndsWith("/")) ollamaUrl += "/";
+
+    client.BaseAddress = new Uri(ollamaUrl);
+    client.Timeout = TimeSpan.FromMinutes(5); // Tiempo de espera largo para IA
 });
 
 // =======================================================
-// 🔹 CONFIGURACIÓN DE MONGO DB
+// 🍃 3. MONGO DB
 // =======================================================
 builder.Services.AddSingleton<IMongoClient>(sp =>
 {
     var connection = builder.Configuration["MongoDB:ConnectionString"]
+        ?? builder.Configuration["MONGODB_CONNECTIONSTRING"]
         ?? "mongodb://localhost:27017";
     return new MongoClient(connection);
 });
@@ -33,12 +57,17 @@ builder.Services.AddSingleton<IMongoClient>(sp =>
 builder.Services.AddScoped<IMongoDatabase>(sp =>
 {
     var client = sp.GetRequiredService<IMongoClient>();
-    return client.GetDatabase("OnboardingDB");
+    var dbName = builder.Configuration.GetValue<string>("MongoDB:DatabaseName")
+        ?? builder.Configuration["MONGODB_DATABASENAME"]
+        ?? "OnboardingDB";
+    return client.GetDatabase(dbName);
 });
 
 // =======================================================
-// 🔹 REPOSITORIOS Y SERVICIOS
+// 💉 4. INYECCIÓN DE DEPENDENCIAS (Todos los módulos)
 // =======================================================
+
+// --- Módulos Base ---
 builder.Services.AddScoped<IActividadRepository, ActividadRepository>();
 builder.Services.AddScoped<IActividadService, ActividadService>();
 
@@ -56,7 +85,7 @@ builder.Services.AddScoped<IRecursoService, RecursoService>();
 
 builder.Services.AddScoped<IJwtService, JwtService>();
 
-// Register new CatalogoOnboarding and SalasChat services and repositories
+// --- Módulos Extra (Activos) ---
 builder.Services.AddScoped<ICatalogoOnboardingRepository, CatalogoOnboardingRepository>();
 builder.Services.AddScoped<ICatalogoOnboardingService, CatalogoOnboardingService>();
 
@@ -64,10 +93,19 @@ builder.Services.AddScoped<ISalasChatRepository, SalasChatRepository>();
 builder.Services.AddScoped<ISalasChatService, SalasChatService>();
 
 // =======================================================
-// 🔐 CONFIGURACIÓN DE JWT
+// 🔐 5. SEGURIDAD (JWT)
 // =======================================================
-var jwtKey = builder.Configuration["Jwt:Secret"] ?? "clave-secreta-super-segura-12345";
-var jwtIssuer = builder.Configuration["Jwt:Issuer"] ?? "OnboardingAPI";
+var jwtKey = builder.Configuration["Jwt:Secret"]
+    ?? builder.Configuration["JWT_SECRET"]
+    ?? "clave-secreta-prueba-12345-super-larga-para-seguridad";
+
+var jwtIssuer = builder.Configuration["Jwt:Issuer"]
+    ?? builder.Configuration["JWT_ISSUER"]
+    ?? "OnboardingAPI";
+
+var jwtAudience = builder.Configuration["Jwt:Audience"]
+    ?? builder.Configuration["JWT_AUDIENCE"]
+    ?? "OnboardingFrontend";
 
 builder.Services.AddAuthentication(options =>
 {
@@ -83,46 +121,57 @@ builder.Services.AddAuthentication(options =>
         ValidateLifetime = true,
         ValidateIssuerSigningKey = true,
         ValidIssuer = jwtIssuer,
-        ValidAudience = builder.Configuration["Jwt:Audience"],
+        ValidAudience = jwtAudience,
         IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtKey))
     };
 });
 
 // =======================================================
-// 🌐 CORS — NECESARIO PARA SWAGGER Y FRONTEND
+// 🌐 6. CORS & SWAGGER
 // =======================================================
 builder.Services.AddCors(options =>
 {
-    options.AddPolicy("AllowAll", policy =>
+    options.AddPolicy("AllowAll", p => p.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader());
+});
+
+builder.Services.AddControllers();
+builder.Services.AddEndpointsApiExplorer();
+
+builder.Services.AddSwaggerGen(c =>
+{
+    c.SwaggerDoc("v1", new OpenApiInfo { Title = "Onboarding API", Version = "v1" });
+    c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
     {
-        policy.AllowAnyOrigin()
-              .AllowAnyHeader()
-              .AllowAnyMethod();
+        Description = "JWT Authorization. Escribe 'Bearer {token}'",
+        Name = "Authorization",
+        In = ParameterLocation.Header,
+        Type = SecuritySchemeType.ApiKey,
+        Scheme = "Bearer"
+    });
+    c.AddSecurityRequirement(new OpenApiSecurityRequirement
+    {
+        {
+            new OpenApiSecurityScheme
+            {
+                Reference = new OpenApiReference { Type = ReferenceType.SecurityScheme, Id = "Bearer" },
+                Scheme = "oauth2",
+                Name = "Bearer",
+                In = ParameterLocation.Header,
+            },
+            new List<string>()
+        }
     });
 });
 
-// =======================================================
-// 🌐 CONTROLADORES + SWAGGER
-// =======================================================
-builder.Services.AddControllers();
-builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
-
-// =======================================================
-// ⚙️ CREAR APP
-// =======================================================
 var app = builder.Build();
 
 // =======================================================
-// 🧩 MIDDLEWARE
+// 🚀 7. PIPELINE (Middleware)
 // =======================================================
-if (app.Environment.IsDevelopment())
-{
-    app.UseSwagger();
-    app.UseSwaggerUI();
-}
 
-app.UseHttpsRedirection();
+// Swagger siempre visible (incluso en producción/Render)
+app.UseSwagger();
+app.UseSwaggerUI();
 
 app.UseCors("AllowAll");
 
@@ -131,9 +180,10 @@ app.UseAuthorization();
 
 app.MapControllers();
 
-Console.WriteLine("============================================");
-Console.WriteLine("  🚀 Onboarding API Iniciada Correctamente");
-Console.WriteLine("  🤖 Ollama disponible en: http://134.199.192.88:11434/api/");
-Console.WriteLine("============================================\n");
+// Mensajes de log para confirmar arranque
+Console.WriteLine("==============================================");
+Console.WriteLine($"🚀 Onboarding API iniciada en puerto: {port}");
+Console.WriteLine($"🧠 Cliente Ollama configurado a: {ollamaUrl}");
+Console.WriteLine("==============================================");
 
 app.Run();

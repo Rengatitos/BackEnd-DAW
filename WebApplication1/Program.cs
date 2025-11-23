@@ -32,7 +32,7 @@ builder.Configuration.AddEnvironmentVariables();
 // 🤖 2. CLIENTE OLLAMA (Configuración Dual)
 // =======================================================
 // Intenta leer la variable de Render. Si no existe, usa tu IP de respaldo.
-var ollamaUrl = builder.Configuration["Ollama:BaseUrl"] ?? "http://134.199.192.88:11434/api/";
+var ollamaUrl = builder.Configuration["OllamaBaseUrl"] ?? "http://134.199.192.88:11434/api/";
 
 builder.Services.AddHttpClient<OllamaClient>(client =>
 {

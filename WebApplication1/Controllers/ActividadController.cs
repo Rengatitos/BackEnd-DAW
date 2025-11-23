@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Onboarding.CORE.Core.Interfaces;
-using Onboarding.CORE.DTOs; // Asegúrate de que esta directiva using esté presente
+using Onboarding.CORE.DTOs;
 
 namespace Onboarding.Api.Controllers
 {
@@ -44,8 +44,9 @@ namespace Onboarding.Api.Controllers
 
         /// <summary>
         /// Obtiene una actividad por su ID
+        /// 🛡️ CORREGIDO: Se agrega constraint :length(24) para evitar que atrape palabras como 'usuario'
         /// </summary>
-        [HttpGet("{id}")]
+        [HttpGet("{id:length(24)}")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<ActionResult<ActividadResponseDTO>> GetById(string id)
@@ -191,9 +192,9 @@ namespace Onboarding.Api.Controllers
             }
         }
 
-       
+        /// <summary>
         /// Crea una nueva actividad
-       
+        /// </summary>
         [HttpPost]
         [ProducesResponseType(StatusCodes.Status201Created)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -228,8 +229,9 @@ namespace Onboarding.Api.Controllers
 
         /// <summary>
         /// Actualiza una actividad existente
+        /// 🛡️ CORREGIDO: Constraint de longitud
         /// </summary>
-        [HttpPut("{id}")]
+        [HttpPut("{id:length(24)}")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
@@ -267,8 +269,9 @@ namespace Onboarding.Api.Controllers
 
         /// <summary>
         /// Actualiza solo el estado de una actividad
+        /// 🛡️ CORREGIDO: Constraint de longitud
         /// </summary>
-        [HttpPatch("{id}/estado")]
+        [HttpPatch("{id:length(24)}/estado")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
@@ -299,8 +302,9 @@ namespace Onboarding.Api.Controllers
 
         /// <summary>
         /// Elimina una actividad
+        /// 🛡️ CORREGIDO: Constraint de longitud
         /// </summary>
-        [HttpDelete("{id}")]
+        [HttpDelete("{id:length(24)}")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<ActionResult> Delete(string id)

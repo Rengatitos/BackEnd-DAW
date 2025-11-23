@@ -2,50 +2,54 @@
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using MongoDB.Driver;
+// =======================================================
+// 📦 USINGS (Importación de tus carpetas)
+// =======================================================
+// Si alguna línea marca rojo, bórrala y deja la que funcione según tu estructura de carpetas.
+
 using Onboarding.CORE.Core.Interfaces;
 using Onboarding.CORE.Helpers;
+using Onboarding.CORE.Infrastructure.Repositories;
 using Onboarding.CORE.Services;
+// A veces los repositorios están en INFRA o Infrastructure, dejo ambos por si acaso:
 using Onboarding.INFRA.Repositories;
 using Onboarding.Infrastructure.Repositories;
 using System.Text;
 
-
-
 var builder = WebApplication.CreateBuilder(args);
 
 // =======================================================
-// 🌍 RENDER: PUERTO DINÁMICO (NO BORRAR)
+// 🌍 1. CONFIGURACIÓN DE PUERTO (Vital para Render)
 // =======================================================
+// Render asigna un puerto dinámico en la variable PORT. Si no existe, usa el 8080.
 var port = Environment.GetEnvironmentVariable("PORT") ?? "8080";
 builder.WebHost.UseUrls($"http://0.0.0.0:{port}");
 
-// =======================================================
-// 🔧 VARIABLES DE ENTORNO
-// =======================================================
+// Cargar variables de entorno del sistema
 builder.Configuration.AddEnvironmentVariables();
 
 // =======================================================
-// 🤖 CLIENTE OLLAMA (CORREGIDO CON TU IP)
+// 🤖 2. CLIENTE OLLAMA (Configuración Dual)
 // =======================================================
-// 1. Intenta leer la variable 'Ollama:BaseUrl' de Render (DuckDNS).
-// 2. Si no existe, usa tu IP directa como respaldo.
+// Intenta leer la variable de Render. Si no existe, usa tu IP de respaldo.
 var ollamaUrl = builder.Configuration["Ollama:BaseUrl"] ?? "http://134.199.192.88:11434/api/";
 
 builder.Services.AddHttpClient<OllamaClient>(client =>
 {
-    // Aseguramos que la URL termine en barra '/' para evitar errores de ruta
+    // Aseguramos que termine en '/' para evitar errores de ruta
     if (!ollamaUrl.EndsWith("/")) ollamaUrl += "/";
 
     client.BaseAddress = new Uri(ollamaUrl);
-    client.Timeout = TimeSpan.FromMinutes(5); // Timeout largo para modelos de IA
+    client.Timeout = TimeSpan.FromMinutes(5); // Tiempo de espera largo para IA
 });
 
 // =======================================================
-// 🔹 MONGO DB (TU CONFIGURACIÓN ORIGINAL)
+// 🍃 3. MONGO DB
 // =======================================================
 builder.Services.AddSingleton<IMongoClient>(sp =>
 {
     var connection = builder.Configuration["MongoDB:ConnectionString"]
+        ?? builder.Configuration["MONGODB_CONNECTIONSTRING"]
         ?? "mongodb://localhost:27017";
     return new MongoClient(connection);
 });
@@ -53,17 +57,17 @@ builder.Services.AddSingleton<IMongoClient>(sp =>
 builder.Services.AddScoped<IMongoDatabase>(sp =>
 {
     var client = sp.GetRequiredService<IMongoClient>();
-    var dbName =
-        builder.Configuration.GetValue<string>("MongoDB:DatabaseName")
+    var dbName = builder.Configuration.GetValue<string>("MongoDB:DatabaseName")
         ?? builder.Configuration["MONGODB_DATABASENAME"]
         ?? "OnboardingDB";
-
     return client.GetDatabase(dbName);
 });
 
 // =======================================================
-// 🔹 REPOSITORIOS Y SERVICIOS (TODOS TUS MÓDULOS)
+// 💉 4. INYECCIÓN DE DEPENDENCIAS (Todos los módulos)
 // =======================================================
+
+// --- Módulos Base ---
 builder.Services.AddScoped<IActividadRepository, ActividadRepository>();
 builder.Services.AddScoped<IActividadService, ActividadService>();
 
@@ -81,14 +85,15 @@ builder.Services.AddScoped<IRecursoService, RecursoService>();
 
 builder.Services.AddScoped<IJwtService, JwtService>();
 
-// Descomenta si usas estos módulos también:
+// --- Módulos Extra (Activos) ---
 builder.Services.AddScoped<ICatalogoOnboardingRepository, CatalogoOnboardingRepository>();
 builder.Services.AddScoped<ICatalogoOnboardingService, CatalogoOnboardingService>();
+
 builder.Services.AddScoped<ISalasChatRepository, SalasChatRepository>();
 builder.Services.AddScoped<ISalasChatService, SalasChatService>();
 
 // =======================================================
-// 🔐 JWT (TU CONFIGURACIÓN ORIGINAL)
+// 🔐 5. SEGURIDAD (JWT)
 // =======================================================
 var jwtKey = builder.Configuration["Jwt:Secret"]
     ?? builder.Configuration["JWT_SECRET"]
@@ -122,28 +127,19 @@ builder.Services.AddAuthentication(options =>
 });
 
 // =======================================================
-// 🌐 CORS
+// 🌐 6. CORS & SWAGGER
 // =======================================================
 builder.Services.AddCors(options =>
 {
-    options.AddPolicy("AllowAll", policy =>
-    {
-        policy.AllowAnyOrigin()
-              .AllowAnyMethod()
-              .AllowAnyHeader();
-    });
+    options.AddPolicy("AllowAll", p => p.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader());
 });
 
-// =======================================================
-// 🌐 CONTROLADORES Y SWAGGER
-// =======================================================
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 
 builder.Services.AddSwaggerGen(c =>
 {
     c.SwaggerDoc("v1", new OpenApiInfo { Title = "Onboarding API", Version = "v1" });
-    // Configuración del candadito para probar Login en Swagger
     c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
     {
         Description = "JWT Authorization. Escribe 'Bearer {token}'",
@@ -167,24 +163,15 @@ builder.Services.AddSwaggerGen(c =>
     });
 });
 
-// =======================================================
-// ⚙️ CREAR APP
-// =======================================================
 var app = builder.Build();
 
 // =======================================================
-// 🧩 MIDDLEWARE
+// 🚀 7. PIPELINE (Middleware)
 // =======================================================
-if (app.Environment.IsDevelopment())
-{
-    app.UseSwagger();
-    app.UseSwaggerUI();
-}
 
+// Swagger siempre visible (incluso en producción/Render)
 app.UseSwagger();
 app.UseSwaggerUI();
-
-// app.UseHttpsRedirection(); // Render maneja SSL, mejor dejarlo comentado
 
 app.UseCors("AllowAll");
 
@@ -193,6 +180,7 @@ app.UseAuthorization();
 
 app.MapControllers();
 
+// Mensajes de log para confirmar arranque
 Console.WriteLine("==============================================");
 Console.WriteLine($"🚀 Onboarding API iniciada en puerto: {port}");
 Console.WriteLine($"🧠 Cliente Ollama configurado a: {ollamaUrl}");

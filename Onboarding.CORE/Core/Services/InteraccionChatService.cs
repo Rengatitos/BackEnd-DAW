@@ -3,6 +3,7 @@ using Onboarding.CORE.DTOs;
 using Onboarding.CORE.Entities;
 using Onboarding.CORE.Helpers;
 using MongoDB.Bson;
+using System.Linq;
 
 namespace Onboarding.CORE.Services
 {
@@ -104,6 +105,12 @@ namespace Onboarding.CORE.Services
         public async Task DeleteAsync(string id)
         {
             await _interaccionRepository.DeleteAsync(id);
+        }
+
+        public async Task<InteraccionChatDTO?> GetLastByUsuarioAsync(string usuarioRef)
+        {
+            var interaccion = await _interaccionRepository.GetLastByUsuarioAsync(usuarioRef);
+            return interaccion == null ? null : MapToDTO(interaccion);
         }
 
         private static InteraccionChatDTO MapToDTO(InteraccionChat i)

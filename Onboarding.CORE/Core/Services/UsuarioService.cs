@@ -83,4 +83,9 @@ public class UsuarioService : IUsuarioService
     {
         await _usuarioRepository.DeleteAsync(id);
     }
+
+    public async Task<List<Usuario>> GetByRolRefAsync(string rolRef)
+    {
+        return await _usuarioRepository.GetByRolRefAsync(rolRef);
+    }
 }

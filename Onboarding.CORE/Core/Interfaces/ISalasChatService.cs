@@ -12,5 +12,6 @@ namespace Onboarding.CORE.Core.Interfaces
         Task<bool> UpdateContextoAsync(string usuarioRef, SalaChatUpdateContextoDTO dto);
         Task<bool> DeleteAsync(string usuarioRef);
         Task<bool> UpdateEstadoAsync(string usuarioRef, CORE.DTOs.SalaChatUpdateEstadoDTO dto);
+        Task<List<SalaChatDTO>> GetAllAsync();
     }
 }

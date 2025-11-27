@@ -18,6 +18,11 @@ namespace Onboarding.CORE.Infrastructure.Repositories
         {
             return await _collection.Find(s => s.UsuarioRef == usuarioRef).FirstOrDefaultAsync();
         }
+        public async Task<List<SalaChat>> GetAllAsync()
+        {
+            // "s => true" actúa como un filtro vacío, trayendo todos los documentos
+            return await _collection.Find(s => true).ToListAsync();
+        }
 
         public async Task CreateAsync(SalaChat sala)
         {

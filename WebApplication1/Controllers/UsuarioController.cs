@@ -83,6 +83,45 @@ namespace Onboarding.Api.Controllers
         }
 
 
+        // ============================================================
+        // ✏️ ACTUALIZAR USUARIO
+        // ============================================================
+        [HttpPut("{id}")]
+        //[Authorize(Roles = "Administrador")] 
+        public async Task<IActionResult> Update(string id, [FromBody] UsuarioCreateDTO dto)
+        {
+            // 1. Validar que el usuario exista
+            var existingUser = await _usuarioService.GetByIdAsync(id);
+            if (existingUser == null)
+            {
+                return NotFound(new { message = "Usuario no encontrado" });
+            }
+
+            // 2. Actualizar
+            await _usuarioService.UpdateAsync(id, dto);
+            return Ok(new { message = "Usuario actualizado correctamente" });
+        }
+
+        // ============================================================
+        // 🗑️ ELIMINAR USUARIO
+        // ============================================================
+        [HttpDelete("{id}")]
+        //[Authorize(Roles = "Administrador")]
+        public async Task<IActionResult> Delete(string id)
+        {
+            // 1. Validar que el usuario exista
+            var existingUser = await _usuarioService.GetByIdAsync(id);
+            if (existingUser == null)
+            {
+                return NotFound(new { message = "Usuario no encontrado" });
+            }
+
+            // 2. Eliminar
+            await _usuarioService.DeleteAsync(id);
+            return Ok(new { message = "Usuario eliminado correctamente" });
+        }
+
+
 
 
     }

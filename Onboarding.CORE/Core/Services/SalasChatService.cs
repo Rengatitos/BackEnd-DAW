@@ -169,5 +169,16 @@ namespace Onboarding.CORE.Services
         {
             throw new NotImplementedException();
         }
+        // ============================================================
+        // GET ALL – Obtener todas las salas
+        // ============================================================
+        public async Task<List<SalaChatDTO>> GetAllAsync()
+        {
+            // 1. Obtener las entidades desde el repositorio
+            var entities = await _repo.GetAllAsync();
+
+            // 2. Convertir la lista de Entidades a lista de DTOs usando MapToDTO
+            return entities.Select(MapToDTO).ToList();
+        }
     }
 }

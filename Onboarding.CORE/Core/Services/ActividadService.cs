@@ -245,6 +245,36 @@ namespace Onboarding.CORE.Services
         /// <summary>
         /// Mapea de entidad a DTO de respuesta
         /// </summary>
+        /// 
+
+        public async Task<object> GetProgresoGlobalAsync()
+        {
+            var actividades = await _actividadRepository.GetAllAsync();
+
+            var usuarios = actividades
+                .GroupBy(a => a.UsuarioRef)
+                .ToList();
+
+            var resumen = usuarios.Select(u =>
+            {
+                int total = u.Count();
+                int completadas = u.Count(x => x.Estado.ToLower() == "completada");
+                int progreso = total == 0 ? 0 : (completadas * 100 / total);
+
+                return new { usuarioRef = u.Key, progreso };
+            });
+
+            return new
+            {
+                rango_0_25 = resumen.Count(x => x.progreso <= 25),
+                rango_26_50 = resumen.Count(x => x.progreso > 25 && x.progreso <= 50),
+                rango_51_75 = resumen.Count(x => x.progreso > 50 && x.progreso <= 75),
+                rango_76_100 = resumen.Count(x => x.progreso > 75)
+            };
+        }
+
+
+
         private static ActividadResponseDTO MapToResponse(Actividad a) => new()
         {
             Id = a.Id!,

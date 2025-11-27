@@ -299,6 +299,67 @@ namespace Onboarding.Api.Controllers
                 return StatusCode(500, new { mensaje = "Error interno del servidor" });
             }
         }
+        /// <summary>
+        /// Obtiene un resumen del progreso de un usuario
+        /// </summary>
+        [HttpGet("resumen/{usuarioRef}")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        public async Task<ActionResult> GetResumenUsuario(string usuarioRef)
+        {
+            try
+            {
+                var actividades = await _actividadService.GetByUsuarioAsync(usuarioRef);
+
+                if (actividades == null || !actividades.Any())
+                    return Ok(new
+                    {
+                        usuarioRef,
+                        total = 0,
+                        completadas = 0,
+                        pendientes = 0,
+                        progreso = 0
+                    });
+
+                int total = actividades.Count();
+                int completadas = actividades.Count(a => a.Estado.ToLower() == "completada");
+                int pendientes = total - completadas;
+
+                int progreso = (int)Math.Round((double)completadas * 100 / total);
+
+                return Ok(new
+                {
+                    usuarioRef,
+                    total,
+                    completadas,
+                    pendientes,
+                    progreso
+                });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { mensaje = "Error interno del servidor" });
+            }
+        }
+
+
+
+        /// <summary>
+        /// Obtiene resumen global del progreso de todos los usuarios
+        /// </summary>
+        [HttpGet("resumen-global")]
+        public async Task<ActionResult> GetResumenGlobal()
+        {
+            try
+            {
+                var resumen = await _actividadService.GetProgresoGlobalAsync();
+                return Ok(resumen);
+            }
+            catch (Exception)
+            {
+                return StatusCode(500, new { mensaje = "Error obteniendo resumen global" });
+            }
+        }
+
 
         /// <summary>
         /// Elimina una actividad

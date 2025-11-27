@@ -62,5 +62,18 @@ namespace Onboarding.Api.Controllers
             if (!deleted) return NotFound();
             return NoContent();
         }
+
+        // ============================================================
+        // GET ALL – Obtener todas las salas
+        // RUTA: GET api/salas
+        // ============================================================
+        [HttpGet]
+        public async Task<IActionResult> GetAll()
+        {
+            var salas = await _service.GetAllAsync();
+
+            // Retorna 200 OK con la lista (aunque esté vacía)
+            return Ok(salas);
+        }
     }
 }

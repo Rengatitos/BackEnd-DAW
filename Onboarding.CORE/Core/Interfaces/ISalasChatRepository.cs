@@ -12,5 +12,6 @@ namespace Onboarding.CORE.Core.Interfaces
         Task<bool> UpdateContextoAsync(string usuarioRef, string nuevoContexto);
         Task UpdateAsync(SalaChat entity);
         Task DeleteAsync(string usuarioRef);
+        Task<List<SalaChat>> GetAllAsync(); // <--- Agregar esta línea
     }
 }

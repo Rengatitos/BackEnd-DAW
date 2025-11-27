@@ -35,6 +35,24 @@ namespace Onboarding.Api.Controllers
             return Ok(new { outbound_ip = ip });
         }
 
+        // ============================================================
+        // GET ALL – Obtener todo el historial de interacciones
+        // ============================================================
+        [HttpGet]
+        public async Task<IActionResult> GetAll()
+        {
+            try
+            {
+                var historial = await _chatService.GetAllAsync();
+                return Ok(historial);
+            }
+            catch (System.Exception ex)
+            {
+                _logger.LogError(ex, "Error al obtener el historial de interacciones.");
+                return StatusCode(500, new { message = "Error interno", detalle = ex.Message });
+            }
+        }
+
 
         /// <summary>
         /// Procesa un mensaje del usuario, obtiene respuesta de Ollama (prompt ligero),

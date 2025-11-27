@@ -3,6 +3,7 @@ using Onboarding.CORE.Core.Interfaces;
 using Onboarding.CORE.DTOs;
 using System.Threading.Tasks;
 using SalaChatUpdateEstadoDTO = Onboarding.CORE.DTOs.SalaChatUpdateEstadoDTO;
+using System.Collections.Generic;
 
 namespace Onboarding.Api.Controllers
 {
@@ -15,6 +16,13 @@ namespace Onboarding.Api.Controllers
         public SalasChatController(ISalasChatService service)
         {
             _service = service;
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> GetAll()
+        {
+            var salas = await _service.GetAllAsync();
+            return Ok(salas);
         }
 
         [HttpGet("{usuarioRef}")]

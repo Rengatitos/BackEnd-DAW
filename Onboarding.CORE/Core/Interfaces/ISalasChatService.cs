@@ -1,11 +1,13 @@
 using Onboarding.CORE.Core.DTOs;
 using Onboarding.CORE.DTOs;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 
 namespace Onboarding.CORE.Core.Interfaces
 {
     public interface ISalasChatService
     {
+        Task<List<SalaChatDTO>> GetAllAsync();
         Task<SalaChatDTO?> GetByUsuarioRefAsync(string usuarioRef);
         Task<SalaChatDTO> CreateAsync(SalaChatCreateDTO dto);
         Task<bool> UpdateEstadoAsync(string usuarioRef, SalaChatUpdateEstadoDTO dto);

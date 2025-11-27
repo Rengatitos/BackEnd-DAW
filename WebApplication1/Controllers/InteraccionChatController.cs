@@ -27,6 +27,7 @@ namespace Onboarding.Api.Controllers
             _ollamaClient = ollamaClient;
             _logger = logger;
         }
+
         [HttpGet("render-ip")]
         public async Task<IActionResult> GetRenderIp()
         {
@@ -35,6 +36,27 @@ namespace Onboarding.Api.Controllers
             return Ok(new { outbound_ip = ip });
         }
 
+        [HttpGet]
+        public async Task<IActionResult> GetAll()
+        {
+            var all = await _chatService.GetAllAsync();
+            return Ok(all);
+        }
+
+        [HttpGet("usuario/{usuarioRef}")]
+        public async Task<IActionResult> GetByUsuario(string usuarioRef)
+        {
+            var byUser = await _chatService.GetByUsuarioAsync(usuarioRef);
+            return Ok(byUser);
+        }
+
+        [HttpGet("{id}")]
+        public async Task<IActionResult> GetById(string id)
+        {
+            var item = await _chatService.GetByIdAsync(id);
+            if (item == null) return NotFound();
+            return Ok(item);
+        }
 
         /// <summary>
         /// Procesa un mensaje del usuario, obtiene respuesta de Ollama (prompt ligero),

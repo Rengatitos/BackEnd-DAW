@@ -2,6 +2,7 @@ using MongoDB.Driver;
 using Onboarding.CORE.Entities;
 using Onboarding.CORE.Core.Interfaces;
 using System.Threading.Tasks;
+using System.Collections.Generic;
 
 namespace Onboarding.CORE.Infrastructure.Repositories
 {
@@ -12,6 +13,11 @@ namespace Onboarding.CORE.Infrastructure.Repositories
         public SalasChatRepository(IMongoDatabase db)
         {
             _collection = db.GetCollection<SalaChat>("SalasChat");
+        }
+
+        public async Task<List<SalaChat>> GetAllAsync()
+        {
+            return await _collection.Find(_ => true).ToListAsync();
         }
 
         public async Task<SalaChat?> GetByUsuarioRefAsync(string usuarioRef)

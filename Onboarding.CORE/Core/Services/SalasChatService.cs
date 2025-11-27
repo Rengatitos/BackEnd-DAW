@@ -5,6 +5,8 @@ using Onboarding.CORE.DTOs;
 using Onboarding.CORE.Entities;
 using System;
 using System.Threading.Tasks;
+using System.Collections.Generic;
+using System.Linq;
 using SalaChatUpdateEstadoDTO = Onboarding.CORE.DTOs.SalaChatUpdateEstadoDTO;
 
 namespace Onboarding.CORE.Services
@@ -16,6 +18,15 @@ namespace Onboarding.CORE.Services
         public SalasChatService(ISalasChatRepository repo)
         {
             _repo = repo;
+        }
+
+        // ============================================================
+        // GET – Obtener todas las salas
+        // ============================================================
+        public async Task<List<SalaChatDTO>> GetAllAsync()
+        {
+            var entities = await _repo.GetAllAsync();
+            return entities.Select(MapToDTO).ToList();
         }
 
         // ============================================================

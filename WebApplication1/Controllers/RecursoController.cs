@@ -102,6 +102,8 @@ namespace Onboarding.Api.Controllers
         // Valida que el recurso exista antes de actualizar.
         // ==================================================
         [HttpPatch("{id}/estado")]
+        [Authorize(Roles = "Administrador")] // ⛔ SOLO ADMIN
+
         public async Task<IActionResult> UpdateEstado(string id, [FromBody] RecursoEstadoDTO dto)
         {
             if (!ModelState.IsValid)

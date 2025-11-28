@@ -123,6 +123,8 @@ namespace Onboarding.Api.Controllers
         /// Obtiene actividades por estado
         /// </summary>
         [HttpGet("estado/{estado}")]
+        [Authorize(Roles = "Administrador")] // ⛔ SOLO ADMIN
+
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         public async Task<ActionResult<List<ActividadResponseDTO>>> GetByEstado(string estado)
@@ -147,6 +149,8 @@ namespace Onboarding.Api.Controllers
         /// Obtiene actividades en un rango de fechas
         /// </summary>
         [HttpGet("rango-fechas")]
+        [Authorize(Roles = "Administrador")] // ⛔ SOLO ADMIN
+
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         public async Task<ActionResult<List<ActividadResponseDTO>>> GetByFechaRango(
@@ -173,6 +177,8 @@ namespace Onboarding.Api.Controllers
         /// Obtiene el conteo de actividades de un usuario específico
         /// </summary>
         [HttpGet("count/{usuarioRef}")]
+        [Authorize(Roles = "Administrador")] // ⛔ SOLO ADMIN
+
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         public async Task<ActionResult> GetCountByUsuario(string usuarioRef)
@@ -197,6 +203,8 @@ namespace Onboarding.Api.Controllers
         /// Crea una nueva actividad
         /// </summary>
         [HttpPost]
+        [Authorize(Roles = "Administrador")] // ⛔ SOLO ADMIN
+
         [ProducesResponseType(StatusCodes.Status201Created)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         public async Task<ActionResult<ActividadResponseDTO>> Create([FromBody] ActividadCreateDTO dto)

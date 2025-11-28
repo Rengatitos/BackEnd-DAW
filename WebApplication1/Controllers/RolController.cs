@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Onboarding.CORE.Core.Interfaces;
 using Onboarding.CORE.DTOs;
 
@@ -17,6 +18,8 @@ namespace Onboarding.Api.Controllers
 
         // 🔹 GET: api/Rol
         [HttpGet]
+        [Authorize(Roles = "Administrador")] // ⛔ SOLO ADMIN
+
         public async Task<IActionResult> GetAll()
         {
             var roles = await _rolService.GetAllAsync();
@@ -25,6 +28,8 @@ namespace Onboarding.Api.Controllers
 
         // 🔹 GET: api/Rol/{id}
         [HttpGet("{id}")]
+        [Authorize(Roles = "Administrador")] // ⛔ SOLO ADMIN
+
         public async Task<IActionResult> GetById(string id)
         {
             var rol = await _rolService.GetByIdAsync(id);
@@ -36,6 +41,8 @@ namespace Onboarding.Api.Controllers
 
         // 🔹 POST: api/Rol
         [HttpPost]
+        [Authorize(Roles = "Administrador")] // ⛔ SOLO ADMIN
+
         public async Task<IActionResult> Create([FromBody] RolCreateDTO rolDto)
         {
             if (!ModelState.IsValid)
@@ -47,6 +54,8 @@ namespace Onboarding.Api.Controllers
 
         // 🔹 PUT: api/Rol/{id}
         [HttpPut("{id}")]
+        [Authorize(Roles = "Administrador")] // ⛔ SOLO ADMIN
+
         public async Task<IActionResult> Update(string id, [FromBody] RolCreateDTO rolDto)
         {
             var updated = await _rolService.UpdateAsync(id, rolDto);
@@ -58,6 +67,8 @@ namespace Onboarding.Api.Controllers
 
         // 🔹 DELETE: api/Rol/{id}
         [HttpDelete("{id}")]
+        [Authorize(Roles = "Administrador")] // ⛔ SOLO ADMIN
+
         public async Task<IActionResult> Delete(string id)
         {
             await _rolService.DeleteAsync(id);

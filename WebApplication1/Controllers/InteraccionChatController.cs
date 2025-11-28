@@ -1,12 +1,13 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using Onboarding.CORE.Core.Interfaces;
 using Onboarding.CORE.DTOs;
 using Onboarding.CORE.Helpers;
-using System.Linq;
 using System.Collections.Generic;
-using System.Threading.Tasks;
+using System.Linq;
 using System.Text;
+using System.Threading.Tasks;
 
 namespace Onboarding.Api.Controllers
 {
@@ -39,6 +40,7 @@ namespace Onboarding.Api.Controllers
         // GET ALL – Obtener todo el historial de interacciones
         // ============================================================
         [HttpGet]
+
         public async Task<IActionResult> GetAll()
         {
             try

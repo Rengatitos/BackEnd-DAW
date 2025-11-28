@@ -1,3 +1,4 @@
+﻿using Microsoft.AspNetCore.Authorization; // 👈 No olvides esto
 using Microsoft.AspNetCore.Mvc;
 using Onboarding.CORE.Core.DTOs;
 using Onboarding.CORE.Core.Interfaces;
@@ -17,7 +18,12 @@ namespace Onboarding.Api.Controllers
             _service = service;
         }
 
+        // ============================================================
+        // 🔓 LECTURA (Compartido: Empleado necesita ver la guía)
+        // ============================================================
+
         [HttpGet]
+        // [Authorize] -> Heredado de la clase (Acceso a cualquier logueado)
         public async Task<IActionResult> GetCatalogo()
         {
             var c = await _service.GetCatalogoAsync();
@@ -26,6 +32,7 @@ namespace Onboarding.Api.Controllers
         }
 
         [HttpGet("{etapa}")]
+        // [Authorize] -> Heredado de la clase
         public async Task<IActionResult> GetEtapa(string etapa)
         {
             var e = await _service.GetEtapaAsync(etapa);
@@ -33,7 +40,12 @@ namespace Onboarding.Api.Controllers
             return Ok(e);
         }
 
+        // ============================================================
+        // 🔒 ESCRITURA (Exclusivo Administrador / RRHH)
+        // ============================================================
+
         [HttpPost]
+        [Authorize(Roles = "Administrador")] // ⛔ SOLO ADMIN
         public async Task<IActionResult> CreateCatalogo([FromBody] CatalogoOnboardingCreateItemDTO dto)
         {
             try
@@ -48,6 +60,7 @@ namespace Onboarding.Api.Controllers
         }
 
         [HttpPut("{etapa}")]
+        [Authorize(Roles = "Administrador")] //  SOLO ADMIN
         public async Task<IActionResult> UpdateEtapa(string etapa, [FromBody] CatalogoOnboardingUpdateEtapaDTO dto)
         {
             var updated = await _service.UpdateEtapaAsync(etapa, dto);
@@ -56,6 +69,7 @@ namespace Onboarding.Api.Controllers
         }
 
         [HttpDelete("{etapa}")]
+        [Authorize(Roles = "Administrador")] //  SOLO ADMIN
         public async Task<IActionResult> DeleteEtapa(string etapa)
         {
             var deleted = await _service.DeleteEtapaAsync(etapa);

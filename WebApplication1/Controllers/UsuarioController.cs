@@ -48,7 +48,7 @@ namespace Onboarding.Api.Controllers
         // 👥 LISTAR USUARIOS (solo ADMIN)
         // ============================================================
         [HttpGet]
-        //[Authorize(Roles = "Administrador")]
+        [Authorize(Roles = "Administrador")]
         public async Task<IActionResult> GetAll()
         {
             var usuarios = await _usuarioService.GetAllAsync();
@@ -75,7 +75,7 @@ namespace Onboarding.Api.Controllers
         // ➕ CREAR NUEVO USUARIO (solo ADMIN)
         // ============================================================
         [HttpPost]
-        //[Authorize(Roles = "Administrador")]
+        [Authorize(Roles = "Administrador")]
         public async Task<IActionResult> Create([FromBody] UsuarioCreateDTO dto)
         {
             await _usuarioService.CreateAsync(dto);
@@ -87,7 +87,7 @@ namespace Onboarding.Api.Controllers
         // ✏️ ACTUALIZAR USUARIO
         // ============================================================
         [HttpPut("{id}")]
-        //[Authorize(Roles = "Administrador")] 
+        [Authorize(Roles = "Administrador")] 
         public async Task<IActionResult> Update(string id, [FromBody] UsuarioCreateDTO dto)
         {
             // 1. Validar que el usuario exista
@@ -106,7 +106,7 @@ namespace Onboarding.Api.Controllers
         // 🗑️ ELIMINAR USUARIO
         // ============================================================
         [HttpDelete("{id}")]
-        //[Authorize(Roles = "Administrador")]
+        [Authorize(Roles = "Administrador")]
         public async Task<IActionResult> Delete(string id)
         {
             // 1. Validar que el usuario exista

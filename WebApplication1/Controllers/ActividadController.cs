@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Onboarding.CORE.Core.Interfaces;
 using Onboarding.CORE.DTOs;
 
@@ -303,6 +304,8 @@ namespace Onboarding.Api.Controllers
         /// Obtiene un resumen del progreso de un usuario
         /// </summary>
         [HttpGet("resumen/{usuarioRef}")]
+        [Authorize(Roles = "Administrador")] // ⛔ SOLO ADMIN
+
         [ProducesResponseType(StatusCodes.Status200OK)]
         public async Task<ActionResult> GetResumenUsuario(string usuarioRef)
         {
@@ -347,6 +350,7 @@ namespace Onboarding.Api.Controllers
         /// Obtiene resumen global del progreso de todos los usuarios
         /// </summary>
         [HttpGet("resumen-global")]
+        [Authorize(Roles = "Administrador")]
         public async Task<ActionResult> GetResumenGlobal()
         {
             try
@@ -366,6 +370,8 @@ namespace Onboarding.Api.Controllers
         /// 🛡️ CORREGIDO: Constraint de longitud
         /// </summary>
         [HttpDelete("{id:length(24)}")]
+        [Authorize(Roles = "Administrador")] // ⛔ SOLO ADMIN
+
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<ActionResult> Delete(string id)

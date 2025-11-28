@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Onboarding.CORE.Core.Interfaces;
 using Onboarding.CORE.DTOs;
 
@@ -25,6 +26,8 @@ namespace Onboarding.Api.Controllers
 
         // 🔹 GET: api/Recurso/{id}
         [HttpGet("{id}")]
+        [Authorize(Roles = "Administrador")] // ⛔ SOLO ADMIN
+
         public async Task<IActionResult> GetById(string id)
         {
             var recurso = await _recursoService.GetByIdAsync(id);
@@ -36,6 +39,8 @@ namespace Onboarding.Api.Controllers
 
         // 🔹 POST: api/Recurso
         [HttpPost]
+        [Authorize(Roles = "Administrador")] // ⛔ SOLO ADMIN
+
         public async Task<IActionResult> Create([FromBody] RecursoCreateDTO dto)
         {
             if (!ModelState.IsValid)
@@ -47,6 +52,8 @@ namespace Onboarding.Api.Controllers
 
         // 🔹 PUT: api/Recurso/{id}
         [HttpPut("{id}")]
+        [Authorize(Roles = "Administrador")] // ⛔ SOLO ADMIN
+
         public async Task<IActionResult> Update(string id, [FromBody] RecursoCreateDTO dto)
         {
             if (!ModelState.IsValid)
@@ -61,6 +68,8 @@ namespace Onboarding.Api.Controllers
 
         // 🔹 DELETE: api/Recurso/{id}
         [HttpDelete("{id}")]
+        [Authorize(Roles = "Administrador")] // ⛔ SOLO ADMIN
+
         public async Task<IActionResult> Delete(string id)
         {
             var deleted = await _recursoService.DeleteAsync(id);

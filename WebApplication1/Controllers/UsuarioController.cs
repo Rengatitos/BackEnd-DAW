@@ -13,6 +13,10 @@ namespace Onboarding.Api.Controllers
         private readonly IUsuarioService _usuarioService;
         private readonly IJwtService _jwtService;
 
+        // 📌 1. Definimos tus IDs fijos (Copiados de tu imagen de MongoDB)
+        private const string ID_ROL_ADMINISTRADOR = "6913adbcca79acfd93858d5c";
+        private const string ID_ROL_EMPLEADO = "692284a99875b23f82fb7023";
+
         public UsuarioController(IUsuarioService usuarioService, IJwtService jwtService)
         {
             _usuarioService = usuarioService;
@@ -20,7 +24,7 @@ namespace Onboarding.Api.Controllers
         }
 
         // ============================================================
-        // 🔐 LOGIN - SIN AUTORIZACIÓN
+        // 🔐 LOGIN - Lógica de Mapeo de Roles
         // ============================================================
         [HttpPost("login")]
         [AllowAnonymous]
@@ -30,16 +34,36 @@ namespace Onboarding.Api.Controllers
             if (usuario == null)
                 return Unauthorized(new { message = "Correo o contraseña incorrectos" });
 
+            // 📌 2. LA JUGADA MAESTRA: Traducir ID -> Palabra
+            // Verificamos qué ID tiene el usuario y asignamos el nombre del rol correspondiente.
+
+            string nombreRolParaToken = "Usuario"; // Valor por defecto (Empleado)
+
+            // Nota: Asegúrate si tu propiedad se llama 'Rol' o 'RolRef' en el objeto 'usuario'.
+            // Aquí asumo que 'usuario.Rol' contiene el ID (ej: "6913...").
+            if (usuario.Rol == ID_ROL_ADMINISTRADOR)
+            {
+                nombreRolParaToken = "Administrador";
+            }
+            else if (usuario.Rol == ID_ROL_EMPLEADO)
+            {
+                nombreRolParaToken = "Usuario";
+            }
+
+            // 📌 3. Generamos el Token con la PALABRA ("Administrador")
+            // Esto hace que [Authorize(Roles = "Administrador")] funcione.
             var token = _jwtService.GenerateToken(
                 usuario.Id,
                 usuario.Nombre,
-                usuario.Rol
+                nombreRolParaToken
             );
 
             return Ok(new
             {
                 message = "Inicio de sesión exitoso",
+                // El frontend recibe el objeto original (con el ID) para sus validaciones visuales
                 usuario,
+                // El token lleva la palabra "Administrador" encriptada para pasar la seguridad del backend
                 token
             });
         }
@@ -48,6 +72,7 @@ namespace Onboarding.Api.Controllers
         // 👥 LISTAR USUARIOS (solo ADMIN)
         // ============================================================
         [HttpGet]
+        [Authorize(Roles = "Administrador")] // ✅ Ahora esto funcionará si el token dice "Administrador"
         public async Task<IActionResult> GetAll()
         {
             var usuarios = await _usuarioService.GetAllAsync();
@@ -55,16 +80,15 @@ namespace Onboarding.Api.Controllers
         }
 
         // ============================================================
-        // 🔎 Obtener usuarios por rolRef (acepta 'empleado' y 'administrador' como alias)
+        // 🔎 Obtener usuarios por rolRef 
         // ============================================================
         [HttpGet("rol/{rolRef}")]
         public async Task<IActionResult> GetByRol(string rolRef)
         {
-            // Mapear alias a IDs específicos
             if (rolRef == "empleado")
-                rolRef = "6913adbcca79acfd93858d5d";
+                rolRef = ID_ROL_EMPLEADO;
             else if (rolRef == "administrador")
-                rolRef = "6913adbcca79acfd93858d5c";
+                rolRef = ID_ROL_ADMINISTRADOR;
 
             var usuarios = await _usuarioService.GetByRolRefAsync(rolRef);
             return Ok(usuarios);
@@ -86,17 +110,12 @@ namespace Onboarding.Api.Controllers
         // ✏️ ACTUALIZAR USUARIO
         // ============================================================
         [HttpPut("{id}")]
-        
+        [Authorize(Roles = "Administrador")]
         public async Task<IActionResult> Update(string id, [FromBody] UsuarioCreateDTO dto)
         {
-            // 1. Validar que el usuario exista
             var existingUser = await _usuarioService.GetByIdAsync(id);
-            if (existingUser == null)
-            {
-                return NotFound(new { message = "Usuario no encontrado" });
-            }
+            if (existingUser == null) return NotFound(new { message = "Usuario no encontrado" });
 
-            // 2. Actualizar
             await _usuarioService.UpdateAsync(id, dto);
             return Ok(new { message = "Usuario actualizado correctamente" });
         }
@@ -108,20 +127,11 @@ namespace Onboarding.Api.Controllers
         [Authorize(Roles = "Administrador")]
         public async Task<IActionResult> Delete(string id)
         {
-            // 1. Validar que el usuario exista
             var existingUser = await _usuarioService.GetByIdAsync(id);
-            if (existingUser == null)
-            {
-                return NotFound(new { message = "Usuario no encontrado" });
-            }
+            if (existingUser == null) return NotFound(new { message = "Usuario no encontrado" });
 
-            // 2. Eliminar
             await _usuarioService.DeleteAsync(id);
             return Ok(new { message = "Usuario eliminado correctamente" });
         }
-
-
-
-
     }
 }

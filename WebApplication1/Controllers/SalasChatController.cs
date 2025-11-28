@@ -1,3 +1,4 @@
+ï»¿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Onboarding.CORE.Core.Interfaces;
 using Onboarding.CORE.DTOs;
@@ -40,6 +41,7 @@ namespace Onboarding.Api.Controllers
         }
 
         [HttpPut("{usuarioRef}/estado")]
+
         public async Task<IActionResult> UpdateEstado(string usuarioRef, [FromBody] SalaChatUpdateEstadoDTO dto)
         {
             var updated = await _service.UpdateEstadoAsync(usuarioRef, dto);
@@ -64,15 +66,17 @@ namespace Onboarding.Api.Controllers
         }
 
         // ============================================================
-        // GET ALL – Obtener todas las salas
+        // GET ALL â€“ Obtener todas las salas
         // RUTA: GET api/salas
         // ============================================================
         [HttpGet]
+        [Authorize(Roles = "Administrador")] // â›” SOLO ADMIN
+
         public async Task<IActionResult> GetAll()
         {
             var salas = await _service.GetAllAsync();
 
-            // Retorna 200 OK con la lista (aunque esté vacía)
+            // Retorna 200 OK con la lista (aunque estÃ© vacÃ­a)
             return Ok(salas);
         }
     }

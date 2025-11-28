@@ -312,7 +312,7 @@ namespace Onboarding.Api.Controllers
         /// Obtiene un resumen del progreso de un usuario
         /// </summary>
         [HttpGet("resumen/{usuarioRef}")]
-        [Authorize(Roles = "Administrador")] // ⛔ SOLO ADMIN
+      
 
         [ProducesResponseType(StatusCodes.Status200OK)]
         public async Task<ActionResult> GetResumenUsuario(string usuarioRef)
@@ -358,7 +358,7 @@ namespace Onboarding.Api.Controllers
         /// Obtiene resumen global del progreso de todos los usuarios
         /// </summary>
         [HttpGet("resumen-global")]
-        [Authorize(Roles = "Administrador")]
+       
         public async Task<ActionResult> GetResumenGlobal()
         {
             try

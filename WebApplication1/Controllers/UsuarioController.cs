@@ -72,7 +72,7 @@ namespace Onboarding.Api.Controllers
         // 👥 LISTAR USUARIOS (solo ADMIN)
         // ============================================================
         [HttpGet]
-        [Authorize(Roles = "Administrador")] // ✅ Ahora esto funcionará si el token dice "Administrador"
+        //[Authorize(Roles = "Administrador")] // ✅ Ahora esto funcionará si el token dice "Administrador"
         public async Task<IActionResult> GetAll()
         {
             var usuarios = await _usuarioService.GetAllAsync();
@@ -98,7 +98,7 @@ namespace Onboarding.Api.Controllers
         // ➕ CREAR NUEVO USUARIO (solo ADMIN)
         // ============================================================
         [HttpPost]
-        [Authorize(Roles = "Administrador")]
+        //[Authorize(Roles = "Administrador")]
         public async Task<IActionResult> Create([FromBody] UsuarioCreateDTO dto)
         {
             await _usuarioService.CreateAsync(dto);

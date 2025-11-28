@@ -26,7 +26,7 @@ namespace Onboarding.Api.Controllers
 
         // 🔹 GET: api/Recurso/{id}
         [HttpGet("{id}")]
-        [Authorize(Roles = "Administrador")] // ⛔ SOLO ADMIN
+       
 
         public async Task<IActionResult> GetById(string id)
         {
@@ -39,7 +39,7 @@ namespace Onboarding.Api.Controllers
 
         // 🔹 POST: api/Recurso
         [HttpPost]
-        [Authorize(Roles = "Administrador")] // ⛔ SOLO ADMIN
+        
 
         public async Task<IActionResult> Create([FromBody] RecursoCreateDTO dto)
         {

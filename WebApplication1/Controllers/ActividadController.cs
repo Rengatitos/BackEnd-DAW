@@ -123,7 +123,6 @@ namespace Onboarding.Api.Controllers
         /// Obtiene actividades por estado
         /// </summary>
         [HttpGet("estado/{estado}")]
-        [Authorize(Roles = "Administrador")] // ⛔ SOLO ADMIN
 
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]

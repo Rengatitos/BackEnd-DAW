@@ -27,7 +27,7 @@ namespace Onboarding.Api.Controllers
         // 🔐 LOGIN - Lógica de Mapeo de Roles
         // ============================================================
         [HttpPost("login")]
-        [AllowAnonymous]
+       
         public async Task<IActionResult> Login([FromBody] LoginDTO dto)
         {
             var usuario = await _usuarioService.LoginAsync(dto);

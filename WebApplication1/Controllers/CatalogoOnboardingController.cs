@@ -45,7 +45,6 @@ namespace Onboarding.Api.Controllers
         // ============================================================
 
         [HttpPost]
-        [Authorize(Roles = "Administrador")] // ⛔ SOLO ADMIN
         public async Task<IActionResult> CreateCatalogo([FromBody] CatalogoOnboardingCreateItemDTO dto)
         {
             try
@@ -60,7 +59,6 @@ namespace Onboarding.Api.Controllers
         }
 
         [HttpPut("{etapa}")]
-        [Authorize(Roles = "Administrador")] //  SOLO ADMIN
         public async Task<IActionResult> UpdateEtapa(string etapa, [FromBody] CatalogoOnboardingUpdateEtapaDTO dto)
         {
             var updated = await _service.UpdateEtapaAsync(etapa, dto);
@@ -69,7 +67,6 @@ namespace Onboarding.Api.Controllers
         }
 
         [HttpDelete("{etapa}")]
-        [Authorize(Roles = "Administrador")] //  SOLO ADMIN
         public async Task<IActionResult> DeleteEtapa(string etapa)
         {
             var deleted = await _service.DeleteEtapaAsync(etapa);

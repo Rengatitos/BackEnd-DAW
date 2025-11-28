@@ -18,7 +18,6 @@ namespace Onboarding.Api.Controllers
 
         // 🔹 GET: api/Rol
         [HttpGet]
-        [Authorize(Roles = "Administrador")] // ⛔ SOLO ADMIN
 
         public async Task<IActionResult> GetAll()
         {
@@ -28,7 +27,6 @@ namespace Onboarding.Api.Controllers
 
         // 🔹 GET: api/Rol/{id}
         [HttpGet("{id}")]
-        [Authorize(Roles = "Administrador")] // ⛔ SOLO ADMIN
 
         public async Task<IActionResult> GetById(string id)
         {
@@ -41,7 +39,6 @@ namespace Onboarding.Api.Controllers
 
         // 🔹 POST: api/Rol
         [HttpPost]
-        [Authorize(Roles = "Administrador")] // ⛔ SOLO ADMIN
 
         public async Task<IActionResult> Create([FromBody] RolCreateDTO rolDto)
         {
@@ -54,7 +51,6 @@ namespace Onboarding.Api.Controllers
 
         // 🔹 PUT: api/Rol/{id}
         [HttpPut("{id}")]
-        [Authorize(Roles = "Administrador")] // ⛔ SOLO ADMIN
 
         public async Task<IActionResult> Update(string id, [FromBody] RolCreateDTO rolDto)
         {
@@ -67,7 +63,6 @@ namespace Onboarding.Api.Controllers
 
         // 🔹 DELETE: api/Rol/{id}
         [HttpDelete("{id}")]
-        [Authorize(Roles = "Administrador")] // ⛔ SOLO ADMIN
 
         public async Task<IActionResult> Delete(string id)
         {

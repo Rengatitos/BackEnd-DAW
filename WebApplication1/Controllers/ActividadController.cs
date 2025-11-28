@@ -202,7 +202,7 @@ namespace Onboarding.Api.Controllers
         /// Crea una nueva actividad
         /// </summary>
         [HttpPost]
-        [Authorize(Roles = "Administrador")] // ⛔ SOLO ADMIN
+        //[Authorize(Roles = "Administrador")] // ⛔ SOLO ADMIN
 
         [ProducesResponseType(StatusCodes.Status201Created)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]

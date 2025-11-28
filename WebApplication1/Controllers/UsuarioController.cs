@@ -48,7 +48,6 @@ namespace Onboarding.Api.Controllers
         // 👥 LISTAR USUARIOS (solo ADMIN)
         // ============================================================
         [HttpGet]
-        [Authorize(Roles = "Administrador")]
         public async Task<IActionResult> GetAll()
         {
             var usuarios = await _usuarioService.GetAllAsync();

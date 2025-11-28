@@ -87,7 +87,7 @@ namespace Onboarding.Api.Controllers
         // ✏️ ACTUALIZAR USUARIO
         // ============================================================
         [HttpPut("{id}")]
-        [Authorize(Roles = "Administrador")] 
+        
         public async Task<IActionResult> Update(string id, [FromBody] UsuarioCreateDTO dto)
         {
             // 1. Validar que el usuario exista

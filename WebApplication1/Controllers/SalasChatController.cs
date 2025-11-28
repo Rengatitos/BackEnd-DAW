@@ -70,7 +70,6 @@ namespace Onboarding.Api.Controllers
         // RUTA: GET api/salas
         // ============================================================
         [HttpGet]
-        [Authorize(Roles = "Administrador")] // ⛔ SOLO ADMIN
 
         public async Task<IActionResult> GetAll()
         {
